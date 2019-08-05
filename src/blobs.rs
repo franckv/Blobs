@@ -1,10 +1,11 @@
 use amethyst::{GameData, SimpleState, StateData, StateEvent, SimpleTrans, Trans};
 use amethyst::assets::{AssetStorage, Handle, Loader};
 use amethyst::core::Transform;
-use amethyst::ecs::{Builder, Component, DenseVecStorage, World};
+use amethyst::ecs::{Builder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
 
+use crate::components::Player;
 use crate::map::Map;
 
 pub struct Blobs {
@@ -42,11 +43,6 @@ impl SimpleState for Blobs {
 
         Trans::None
     }
-}
-
-pub struct Player;
-impl Component for Player {
-    type Storage = DenseVecStorage<Self>;
 }
 
 fn init_player(the_world: &mut World, handle: Handle<SpriteSheet>) {

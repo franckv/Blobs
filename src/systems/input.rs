@@ -1,9 +1,8 @@
-use amethyst::core::Transform;
 use amethyst::core::shrev::{EventChannel, ReaderId};
-use amethyst::ecs::{Join, Read, ReadStorage, Resources, System, SystemData, WriteStorage};
+use amethyst::ecs::{Entities, Join, Read, ReadStorage, Resources, System, SystemData, WriteStorage};
 use amethyst::input::{InputEvent, InputEvent::ActionPressed, StringBindings};
 
-use crate::blobs::Player;
+use crate::components::{Direction, Action, Intent, Player};
 
 #[derive(Default)]
 pub struct InputSystem {
@@ -12,49 +11,43 @@ pub struct InputSystem {
 
 impl<'s> System<'s> for InputSystem {
     type SystemData = (
-        WriteStorage<'s, Transform>,
+        WriteStorage<'s, Intent>,
         ReadStorage<'s, Player>,
-        Read<'s, EventChannel<InputEvent<StringBindings>>>
+        Read<'s, EventChannel<InputEvent<StringBindings>>>,
+        Entities<'s>
     );
 
-    fn run(&mut self, (mut transform, player, channel): Self::SystemData) {
-        let (hmove, vmove) = {
-            let mut hmove = 0.;
-            let mut vmove = 0.;
+    fn run(&mut self, (mut intent, player, channel, entities): Self::SystemData) {
+        let action = {
+            let mut action = Action::None;
 
             for event in channel.read(self.reader.as_mut().unwrap()) {
                 debug!("Event: {:?}", event);
                 if let ActionPressed(key) = event {
                     match key.as_ref() {
                         "up" => {
-                            vmove = 1.;
+                            action = Action::Move(Direction::Up)
                         },
                         "down" => {
-                            vmove = -1.;
+                            action = Action::Move(Direction::Down)
                         },
                         "left" => {
-                            hmove = -1.;
+                            action = Action::Move(Direction::Left)
                         },
                         "right" => {
-                            hmove = 1.;
+                            action = Action::Move(Direction::Right)
                         },
                         _ => ()
                     }
                 }
             }
 
-            (hmove, vmove)
+            action
         };
 
-        for (transform, _) in (&mut transform, &player).join() {
-            if hmove != 0.0 {
-                let x = transform.translation().x;
-                transform.set_translation_x(x + hmove * 16.);
-            }
-
-            if vmove != 0.0 {
-                let y = transform.translation().y;
-                transform.set_translation_y(y + vmove * 16.);
+        if action != Action::None {
+            for (_, entity) in (&player, &entities).join() {
+                intent.insert(entity, Intent::new(action)).unwrap();
             }
         }
     }

@@ -11,6 +11,7 @@ use amethyst::renderer::RenderingBundle;
 use amethyst::utils::application_root_dir;
 
 mod blobs;
+mod components;
 mod map;
 mod systems;
 
@@ -37,7 +38,8 @@ pub fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
-        .with(systems::InputSystem::default(), "my_input", &["input_system"])
+        .with(systems::InputSystem::default(), "input_mapper", &["input_system"])
+        .with(systems::MoveSystem, "move_system", &["input_mapper"])
         .with_bundle(rendering_bundle)?;
 
     let mut game = Application::new(assets_dir, Blobs::default(), game_data)?;
