@@ -11,6 +11,7 @@ use amethyst::renderer::RenderingBundle;
 use amethyst::utils::application_root_dir;
 
 mod blobs;
+mod map;
 mod systems;
 
 use crate::blobs::Blobs;
