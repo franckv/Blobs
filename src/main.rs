@@ -37,7 +37,7 @@ pub fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
-        .with(systems::InputSystem, "my_input", &["input_system"])
+        .with(systems::InputSystem::default(), "my_input", &["input_system"])
         .with_bundle(rendering_bundle)?;
 
     let mut game = Application::new(assets_dir, Blobs::default(), game_data)?;
