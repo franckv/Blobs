@@ -1,0 +1,4 @@
+(
+  title: "Blobs",
+  dimensions: Some((500, 500)),
+)
