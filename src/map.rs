@@ -1,8 +1,6 @@
 use amethyst::ecs::Entity;
 
-pub const TILE_SIZE: usize = 16;
-pub const MAP_WIDTH: usize = 32;
-pub const MAP_HEIGHT: usize = 32;
+use crate::config::MapConfig;
 
 pub struct Map {
     width: usize,
@@ -11,18 +9,16 @@ pub struct Map {
     tiles: Vec<Entity>
 }
 
-impl Default for Map {
-    fn default() -> Self {
+impl Map {
+    pub fn new(config: &MapConfig) -> Self {
         Map {
-            width: MAP_WIDTH,
-            height: MAP_HEIGHT,
-            tile_size: TILE_SIZE,
+            width: config.width,
+            height: config.height,
+            tile_size: config.tile_size,
             tiles: Vec::new()
         }
     }
-}
 
-impl Map {
     pub fn width(&self) -> usize {
         self.width
     }

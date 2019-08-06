@@ -5,6 +5,7 @@ use amethyst::ecs::{Builder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
 
+use crate::config::MapConfig;
 use crate::components::Player;
 use crate::map::Map;
 
@@ -45,7 +46,11 @@ impl SimpleState for Blobs {
 }
 
 fn init_map(the_world: &mut World) {
-    the_world.add_resource(Map::default());
+    let map = {
+        let config = &the_world.read_resource::<MapConfig>();
+        Map::new(config)
+    };
+    the_world.add_resource(map);
 }
 
 fn init_player(the_world: &mut World, handle: Handle<SpriteSheet>) {

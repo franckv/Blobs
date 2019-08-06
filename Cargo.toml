@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 amethyst = {version="0.12.0", features=["vulkan", "nightly"]}
 log = "0.4"
+serde = "1.0"

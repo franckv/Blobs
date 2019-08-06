@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate log;
 
-use amethyst::Application;
+use amethyst::{Application, LoggerConfig};
 use amethyst::GameDataBuilder;
+use amethyst::config::Config;
 use amethyst::core::transform::TransformBundle;
 use amethyst::input::{InputBundle, StringBindings};
 use amethyst::renderer::plugins::{RenderFlat2D, RenderToWindow};
@@ -10,21 +11,30 @@ use amethyst::renderer::types::DefaultBackend;
 use amethyst::renderer::RenderingBundle;
 use amethyst::utils::application_root_dir;
 
+use log::LevelFilter;
+
 mod blobs;
+mod config;
 mod components;
 pub mod map;
 mod systems;
 
 use crate::blobs::Blobs;
+use crate::config::BlobsConfig;
 
 pub fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    let mut logger_config = LoggerConfig::default();
+    logger_config.level_filter = LevelFilter::Warn;
+    amethyst::start_logger(logger_config);
 
     let app_root = application_root_dir()?;
     let assets_dir = app_root.join("assets");
     let config_dir = app_root.join("config");
     let display_config_path = config_dir.join("display.ron");
     let binding_path = config_dir.join("bindings.ron");
+    let config_path = config_dir.join("config.ron");
+
+    let config = BlobsConfig::load(&config_path);
 
     let rendering_bundle = RenderingBundle::<DefaultBackend>::new()
         .with_plugin(
@@ -42,7 +52,9 @@ pub fn main() -> amethyst::Result<()> {
         .with(systems::MoveSystem, "move_system", &["input_mapper"])
         .with_bundle(rendering_bundle)?;
 
-    let mut game = Application::new(assets_dir, Blobs::default(), game_data)?;
+    let mut game = Application::build(assets_dir, Blobs::default())?
+        .with_resource(config.map)
+        .build(game_data)?;
 
     game.run();
 

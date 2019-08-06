@@ -1,0 +1,7 @@
+(
+    map: (
+        height: 32,
+        width: 32,
+        tile_size: 16
+    )
+)
