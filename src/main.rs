@@ -15,7 +15,7 @@ use log::LevelFilter;
 
 mod blobs;
 mod config;
-mod components;
+pub mod components;
 pub mod map;
 mod systems;
 

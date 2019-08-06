@@ -7,17 +7,19 @@ use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
 
 use crate::config::MapConfig;
-use crate::components::Player;
+use crate::components::{Player, Tile};
 use crate::map::Map;
 
 pub struct Blobs {
-    sprite_sheet_handle: Option<Handle<SpriteSheet>>
+    sprite_sheet_handle_char: Option<Handle<SpriteSheet>>,
+    sprite_sheet_handle_map: Option<Handle<SpriteSheet>>
 }
 
 impl Default for Blobs {
     fn default() -> Self {
         Blobs {
-            sprite_sheet_handle: None
+            sprite_sheet_handle_char: None,
+            sprite_sheet_handle_map: None
         }
     }
 }
@@ -26,11 +28,15 @@ impl SimpleState for Blobs {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let the_world = data.world;
 
-        let handle = load_sprite_sheet(the_world, "sprites.png", "sprites.ron");
+        the_world.register::<Tile>();
 
-        self.sprite_sheet_handle.replace(handle.clone());
-        init_map(the_world);
-        init_player(the_world, handle);
+        let handle_char = load_sprite_sheet(the_world, "sprites.png", "sprites.ron");
+        let handle_map = load_sprite_sheet(the_world, "dungeon.png", "dungeon.ron");
+
+        self.sprite_sheet_handle_char.replace(handle_char.clone());
+        self.sprite_sheet_handle_map.replace(handle_map.clone());
+        init_map(the_world, handle_map.clone());
+        init_player(the_world, handle_char);
         init_camera(the_world);
     }
 
