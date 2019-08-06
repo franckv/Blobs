@@ -66,23 +66,29 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
     let wall = Tile::new(TileType::Wall, true, false);
     let floor = Tile::default();
 
-    for x in 0..map.width() {
-        for y in 0..map.height() {
+    for y in 0..map.height() {
+        for x in 0..map.width() {
             let mut transform = Transform::default();
             transform.set_scale(Vector3::from_element(map.ratio()));
             transform.set_translation_xyz(x as f32, y as f32, 0.);
 
-            let tile = if (x, y) == (5, 5) {
-                the_world.create_entity()
-                    .with(wall.clone())
-                    .with (transform)
-                    .with(sprite_render.clone())
-                    .build()
-            } else {
-                the_world.create_entity()
-                    .with(floor.clone())
-                    .with (transform)
-                    .build()
+            let tile = match (x, y) {
+                (14, 14) | (14, 15) | (14, 16) | (14, 17) | (14, 18) |
+                    (15, 14) | (16, 14) | (17, 14) | (18, 14) |
+                    (15, 18) | (16, 18) | (17, 18) | (18, 18) |
+                    (18, 15) | (18, 16) | (18, 17) => {
+                    the_world.create_entity()
+                        .with(wall.clone())
+                        .with (transform)
+                        .with(sprite_render.clone())
+                        .build()
+                },
+                _ => {
+                    the_world.create_entity()
+                        .with(floor.clone())
+                        .with (transform)
+                        .build()
+                }
             };
 
             map.add_tile(tile);
