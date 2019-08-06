@@ -7,7 +7,7 @@ use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
 
 use crate::config::MapConfig;
-use crate::components::{Player, Tile};
+use crate::components::{Player, Tile, TileType};
 use crate::map::Map;
 
 pub struct Blobs {
@@ -53,27 +53,43 @@ impl SimpleState for Blobs {
 }
 
 fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
-    let map = {
+    let mut map = {
         let config = &the_world.read_resource::<MapConfig>();
         Map::new(config)
     };
-
-    let mut transform = Transform::default();
-    transform.set_scale(Vector3::from_element(map.ratio()));
-    transform.set_translation_xyz(5., 5., 0.);
 
     let sprite_render = SpriteRender {
         sprite_sheet: handle,
         sprite_number: 0
     };
 
-    let tile = the_world.create_entity()
-        .with(Tile::default())
-        .with (transform)
-        .with(sprite_render)
-        .build();
+    let wall = Tile::new(TileType::Wall, true, false);
+    let floor = Tile::default();
 
-   the_world.add_resource(map);
+    for x in 0..map.width() {
+        for y in 0..map.height() {
+            let mut transform = Transform::default();
+            transform.set_scale(Vector3::from_element(map.ratio()));
+            transform.set_translation_xyz(x as f32, y as f32, 0.);
+
+            let tile = if (x, y) == (5, 5) {
+                the_world.create_entity()
+                    .with(wall.clone())
+                    .with (transform)
+                    .with(sprite_render.clone())
+                    .build()
+            } else {
+                the_world.create_entity()
+                    .with(floor.clone())
+                    .with (transform)
+                    .build()
+            };
+
+            map.add_tile(tile);
+        }
+    }
+
+    the_world.add_resource(map);
 }
 
 fn init_player(the_world: &mut World, handle: Handle<SpriteSheet>) {
@@ -113,7 +129,7 @@ fn init_camera(the_world: &mut World) {
         (transform, camera)
     };
 
-    the_world.create_entity()
+   the_world.create_entity()
         .with(camera)
         .with(transform)
         .build();
