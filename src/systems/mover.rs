@@ -19,19 +19,19 @@ impl<'s> System<'s> for MoveSystem {
             match intent.action() {
                 Action::Move(Direction::Up) => {
                     let y = transform.translation().y;
-                    transform.set_translation_y(y + 16.);
+                    transform.set_translation_y(y + 1.);
                 },
                 Action::Move(Direction::Down) => {
                     let y = transform.translation().y;
-                    transform.set_translation_y(y - 16.);
+                    transform.set_translation_y(y - 1.);
                 },
                 Action::Move(Direction::Left) => {
                     let x = transform.translation().x;
-                    transform.set_translation_x(x - 16.);
+                    transform.set_translation_x(x - 1.);
                 },
                 Action::Move(Direction::Right) => {
                     let x = transform.translation().x;
-                    transform.set_translation_x(x + 16.);
+                    transform.set_translation_x(x + 1.);
                 },
                 _ => ()
             }

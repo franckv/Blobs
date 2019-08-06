@@ -23,20 +23,16 @@ impl Map {
         self.width
     }
 
-    pub fn width_px(&self) -> f32 {
-        (self.width * self.tile_size) as f32
-    }
-
     pub fn height(&self) -> usize {
         self.height
     }
 
-    pub fn height_px(&self) -> f32 {
-        (self.height * self.tile_size) as f32
-    }
-
     pub fn tile_size(&self) -> usize {
         self.tile_size
+    }
+
+    pub fn ratio(&self) -> f32 {
+        1.0 / self.tile_size as f32
     }
 
     pub fn tile(&self, x: usize, y: usize) -> Entity {

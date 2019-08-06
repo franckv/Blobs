@@ -1,6 +1,7 @@
 use amethyst::{GameData, SimpleState, StateData, StateEvent, SimpleTrans, Trans};
 use amethyst::assets::{AssetStorage, Handle, Loader};
 use amethyst::core::Transform;
+use amethyst::core::math::Vector3;
 use amethyst::ecs::{Builder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
@@ -45,21 +46,38 @@ impl SimpleState for Blobs {
     }
 }
 
-fn init_map(the_world: &mut World) {
+fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
     let map = {
         let config = &the_world.read_resource::<MapConfig>();
         Map::new(config)
     };
-    the_world.add_resource(map);
+
+    let mut transform = Transform::default();
+    transform.set_scale(Vector3::from_element(map.ratio()));
+    transform.set_translation_xyz(5., 5., 0.);
+
+    let sprite_render = SpriteRender {
+        sprite_sheet: handle,
+        sprite_number: 0
+    };
+
+    let tile = the_world.create_entity()
+        .with(Tile::default())
+        .with (transform)
+        .with(sprite_render)
+        .build();
+
+   the_world.add_resource(map);
 }
 
 fn init_player(the_world: &mut World, handle: Handle<SpriteSheet>) {
     let transform = {
-        let mut transform = Transform::default();
         let map = the_world.read_resource::<Map>();
+        let mut transform = Transform::default();
+        transform.set_scale(Vector3::from_element(map.ratio()));
 
-        transform.set_translation_xyz(map.width_px() / 2.0,
-                                      map.height_px() / 2.0, 0.0);
+        transform.set_translation_xyz(map.width() as f32 / 2.0,
+                                      map.height() as f32 / 2.0, 0.0);
 
         transform
     };
@@ -81,10 +99,10 @@ fn init_camera(the_world: &mut World) {
         let mut transform = Transform::default();
         let map = the_world.read_resource::<Map>();
 
-        transform.set_translation_xyz(map.width_px() / 2.0,
-                                      map.height_px() / 2.0, 1.0);
+        transform.set_translation_xyz(map.width() as f32 / 2.0,
+                                      map.height() as f32 / 2.0, 1.0);
 
-        let camera = Camera::standard_2d(map.width_px(), map.height_px());
+        let camera = Camera::standard_2d(map.width() as f32, map.height() as f32);
 
         (transform, camera)
     };
