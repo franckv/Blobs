@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 pub struct MapConfig {
     pub width: usize,
     pub height: usize,
+    pub min_size: usize,
+    pub max_size: usize,
+    pub max_rooms: usize,
     pub tile_size: usize
 }
 

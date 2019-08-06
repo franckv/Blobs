@@ -8,7 +8,7 @@ use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteS
 
 use crate::config::MapConfig;
 use crate::components::{Player, Tile, TileType};
-use crate::map::{Generator, Map, Rect};
+use crate::map::{Generator, Map};
 
 pub struct Blobs {
     sprite_sheet_handle_char: Option<Handle<SpriteSheet>>,
@@ -35,8 +35,9 @@ impl SimpleState for Blobs {
 
         self.sprite_sheet_handle_char.replace(handle_char.clone());
         self.sprite_sheet_handle_map.replace(handle_map.clone());
-        init_map(the_world, handle_map.clone());
-        init_player(the_world, handle_char);
+
+        let (player_x, player_y) = init_map(the_world, handle_map);
+        init_player(the_world, player_x, player_y, handle_char);
         init_camera(the_world);
     }
 
@@ -52,7 +53,7 @@ impl SimpleState for Blobs {
     }
 }
 
-fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
+fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) -> (usize, usize) {
     let (mut map, mut generator) = {
         let config = &the_world.read_resource::<MapConfig>();
         (Map::new(config), Generator::new(config))
@@ -68,9 +69,7 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
         sprite_number: 0
     };
 
-
-    generator.dig(Rect::new(1, 1, 10, 10));
-    generator.dig(Rect::new(14, 14, 5, 5));
+    let start = generator.generate();
 
     let floor = Tile::new(TileType::None, false, true);
     let wall = Tile::new(TileType::Wall, true, false);
@@ -110,16 +109,19 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
     }
 
     the_world.add_resource(map);
+
+    start
 }
 
-fn init_player(the_world: &mut World, handle: Handle<SpriteSheet>) {
+fn init_player(the_world: &mut World, player_x: usize, player_y: usize,
+               handle: Handle<SpriteSheet>) {
     let transform = {
         let map = the_world.read_resource::<Map>();
         let mut transform = Transform::default();
         transform.set_scale(Vector3::from_element(map.ratio()));
 
-        transform.set_translation_xyz(map.width() as f32 / 2.0,
-                                      map.height() as f32 / 2.0, 0.0);
+        transform.set_translation_xyz(player_x as f32,
+                                      player_y as f32, 0.0);
 
         transform
     };
