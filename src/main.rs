@@ -12,7 +12,7 @@ use amethyst::utils::application_root_dir;
 
 mod blobs;
 mod components;
-mod map;
+pub mod map;
 mod systems;
 
 use crate::blobs::Blobs;
