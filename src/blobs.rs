@@ -63,8 +63,8 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
         sprite_number: 0
     };
 
+    let floor = Tile::new(TileType::None, false, true);
     let wall = Tile::new(TileType::Wall, true, false);
-    let floor = Tile::default();
 
     for y in 0..map.height() {
         for x in 0..map.width() {
@@ -73,20 +73,19 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
             transform.set_translation_xyz(x as f32, y as f32, 0.);
 
             let tile = match (x, y) {
-                (14, 14) | (14, 15) | (14, 16) | (14, 17) | (14, 18) |
-                    (15, 14) | (16, 14) | (17, 14) | (18, 14) |
-                    (15, 18) | (16, 18) | (17, 18) | (18, 18) |
-                    (18, 15) | (18, 16) | (18, 17) => {
+                (15, 15) | (15, 16) | (15, 17) |
+                    (16, 15) | (16, 16) | (16, 17) |
+                    (17, 15) | (17, 16) | (17, 17) => {
                     the_world.create_entity()
-                        .with(wall.clone())
+                        .with(floor.clone())
                         .with (transform)
-                        .with(sprite_render.clone())
                         .build()
                 },
                 _ => {
                     the_world.create_entity()
-                        .with(floor.clone())
+                        .with(wall.clone())
                         .with (transform)
+                        .with(sprite_render.clone())
                         .build()
                 }
             };
