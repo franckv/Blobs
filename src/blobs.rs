@@ -24,11 +24,10 @@ impl SimpleState for Blobs {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let the_world = data.world;
 
-        the_world.add_resource(Map::default());
-
-        let handle = load_sprite_sheet(the_world, "dwarves.png", "dwarves.ron");
+        let handle = load_sprite_sheet(the_world, "sprites.png", "sprites.ron");
 
         self.sprite_sheet_handle.replace(handle.clone());
+        init_map(the_world);
         init_player(the_world, handle);
         init_camera(the_world);
     }
@@ -43,6 +42,10 @@ impl SimpleState for Blobs {
 
         Trans::None
     }
+}
+
+fn init_map(the_world: &mut World) {
+    the_world.add_resource(Map::default());
 }
 
 fn init_player(the_world: &mut World, handle: Handle<SpriteSheet>) {

@@ -1,12 +1,14 @@
+use amethyst::ecs::Entity;
 
-pub const TILE_SIZE: i32 = 16;
-pub const MAP_WIDTH: i32 = 32;
-pub const MAP_HEIGHT: i32 = 32;
+pub const TILE_SIZE: usize = 16;
+pub const MAP_WIDTH: usize = 32;
+pub const MAP_HEIGHT: usize = 32;
 
 pub struct Map {
-    width: i32,
-    height: i32,
-    tile_size: i32
+    width: usize,
+    height: usize,
+    tile_size: usize,
+    tiles: Vec<Entity>
 }
 
 impl Default for Map {
@@ -14,13 +16,14 @@ impl Default for Map {
         Map {
             width: MAP_WIDTH,
             height: MAP_HEIGHT,
-            tile_size: TILE_SIZE
+            tile_size: TILE_SIZE,
+            tiles: Vec::new()
         }
     }
 }
 
 impl Map {
-    pub fn width(&self) -> i32 {
+    pub fn width(&self) -> usize {
         self.width
     }
 
@@ -28,7 +31,7 @@ impl Map {
         (self.width * self.tile_size) as f32
     }
 
-    pub fn height(&self) -> i32 {
+    pub fn height(&self) -> usize {
         self.height
     }
 
@@ -36,7 +39,13 @@ impl Map {
         (self.height * self.tile_size) as f32
     }
 
-    pub fn tile_size(&self) -> i32 {
+    pub fn tile_size(&self) -> usize {
         self.tile_size
+    }
+
+    pub fn tile(&self, x: usize, y: usize) -> Entity {
+        let idx = x + y * self.width;
+
+        self.tiles[idx]
     }
 }
