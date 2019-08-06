@@ -126,8 +126,9 @@ fn init_camera(the_world: &mut World) {
         let mut transform = Transform::default();
         let map = the_world.read_resource::<Map>();
 
-        transform.set_translation_xyz(map.width() as f32 / 2.0,
-                                      map.height() as f32 / 2.0, 1.0);
+        transform.set_translation_xyz(map.width() as f32 / 2.0 - 0.5,
+                                      map.height() as f32 / 2.0 - 0.5,
+                                      1.0);
 
         let camera = Camera::standard_2d(map.width() as f32, map.height() as f32);
 
