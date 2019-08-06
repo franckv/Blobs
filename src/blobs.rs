@@ -8,7 +8,7 @@ use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteS
 
 use crate::config::MapConfig;
 use crate::components::{Player, Tile, TileType};
-use crate::map::Map;
+use crate::map::{Generator, Map, Rect};
 
 pub struct Blobs {
     sprite_sheet_handle_char: Option<Handle<SpriteSheet>>,
@@ -53,15 +53,24 @@ impl SimpleState for Blobs {
 }
 
 fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
-    let mut map = {
+    let (mut map, mut generator) = {
         let config = &the_world.read_resource::<MapConfig>();
-        Map::new(config)
+        (Map::new(config), Generator::new(config))
     };
 
-    let sprite_render = SpriteRender {
+    let sprite_wall = SpriteRender {
+        sprite_sheet: handle.clone(),
+        sprite_number: 1
+    };
+
+    let sprite_full = SpriteRender {
         sprite_sheet: handle,
         sprite_number: 0
     };
+
+
+    generator.dig(Rect::new(1, 1, 10, 10));
+    generator.dig(Rect::new(14, 14, 5, 5));
 
     let floor = Tile::new(TileType::None, false, true);
     let wall = Tile::new(TileType::Wall, true, false);
@@ -72,22 +81,28 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) {
             transform.set_scale(Vector3::from_element(map.ratio()));
             transform.set_translation_xyz(x as f32, y as f32, 0.);
 
-            let tile = match (x, y) {
-                (15, 15) | (15, 16) | (15, 17) |
-                    (16, 15) | (16, 16) | (16, 17) |
-                    (17, 15) | (17, 16) | (17, 17) => {
+            let tile = match generator.tile(x, y) {
+                TileType::None => {
                     the_world.create_entity()
                         .with(floor.clone())
                         .with (transform)
                         .build()
                 },
-                _ => {
+                TileType::Wall => {
                     the_world.create_entity()
                         .with(wall.clone())
                         .with (transform)
-                        .with(sprite_render.clone())
+                        .with(sprite_wall.clone())
+                        .build()
+                },
+                TileType::Full => {
+                    the_world.create_entity()
+                        .with(wall.clone())
+                        .with (transform)
+                        .with(sprite_full.clone())
                         .build()
                 }
+
             };
 
             map.add_tile(tile);

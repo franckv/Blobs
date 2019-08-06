@@ -3,7 +3,8 @@ use amethyst::ecs::{Component, DenseVecStorage};
 #[derive(Copy, Clone)]
 pub enum TileType {
     None,
-    Wall
+    Wall,
+    Full
 }
 
 #[derive(Clone)]
