@@ -49,4 +49,8 @@ impl Map {
     pub fn add_tile(&mut self, e: Entity) {
         self.tiles.push(e);
     }
+
+    pub fn in_bound(&self, x: f32, y: f32) -> bool {
+        x >= 0. && y >= 0. && x < self.width as f32 && y < self.height as f32
+    }
 }

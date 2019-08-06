@@ -39,7 +39,8 @@ impl<'s> System<'s> for MoveSystem {
                     },
                 };
 
-                if !Self::is_blocked(x + dx, y + dy, &map, &tiles) {
+                if map.in_bound(x + dx, y + dy) &&
+                    !Self::is_blocked(x + dx, y + dy, &map, &tiles) {
                     transform.set_translation_xyz(x + dx, y + dy, 0.);
                 }
 
