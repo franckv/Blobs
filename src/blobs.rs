@@ -41,7 +41,7 @@ impl SimpleState for Blobs {
         init_camera(the_world);
     }
 
-    fn handle_event(&mut self, data: StateData<'_, GameData<'_, '_>>,
+    fn handle_event(&mut self, _data: StateData<'_, GameData<'_, '_>>,
                     event: StateEvent) -> SimpleTrans {
         if let StateEvent::Window(event) = &event {
             if is_key_down(&event, VirtualKeyCode::Escape) {
