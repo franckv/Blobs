@@ -121,7 +121,7 @@ fn init_player(the_world: &mut World, player_x: usize, player_y: usize,
         transform.set_scale(Vector3::from_element(map.ratio()));
 
         transform.set_translation_xyz(player_x as f32,
-                                      player_y as f32, 0.0);
+                                      player_y as f32, 1.0);
 
         transform
     };
@@ -145,7 +145,7 @@ fn init_camera(the_world: &mut World) {
 
         transform.set_translation_xyz(map.width() as f32 / 2.0 - 0.5,
                                       map.height() as f32 / 2.0 - 0.5,
-                                      1.0);
+                                      10.0);
 
         let camera = Camera::standard_2d(map.width() as f32, map.height() as f32);
 
