@@ -7,8 +7,8 @@ use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
 
 use crate::config::MapConfig;
-use crate::components::{Player, Tile, TileType};
-use crate::map::{Generator, Map};
+use crate::components::{Player, Tile};
+use crate::map::{Generator, Map, TileType};
 
 pub struct Blobs {
     sprite_sheet_handle_char: Option<Handle<SpriteSheet>>,
@@ -71,8 +71,8 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) -> (usize, usize
 
     let start = generator.generate();
 
-    let floor = Tile::new(TileType::None, false, true);
-    let wall = Tile::new(TileType::Wall, true, false);
+    let floor = Tile::new(false, true);
+    let wall = Tile::new(true, false);
 
     for y in 0..map.height() {
         for x in 0..map.width() {

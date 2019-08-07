@@ -1,8 +1,14 @@
 use crate::map::Rect;
-use crate::components::TileType;
 use crate::config::MapConfig;
 
 use rand::{Rng, thread_rng};
+
+#[derive(Copy, Clone, PartialEq)]
+pub enum TileType {
+    None,
+    Wall,
+    Full
+}
 
 pub struct Generator {
     width: usize,
