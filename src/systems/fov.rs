@@ -3,7 +3,7 @@ use amethyst::ecs::{Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
 
 use crate::config::FovConfig;
 use crate::map::Map;
-use crate::components::{Init, Intent, Player, Tile};
+use crate::components::{Explored, Init, Intent, Player, Tile};
 
 #[derive(Default)]
 pub struct FovSystem;
@@ -15,6 +15,7 @@ impl<'s> System<'s> for FovSystem {
         ReadStorage<'s, Intent>,
         ReadStorage<'s, Player>,
         ReadStorage<'s, Tile>,
+        ReadStorage<'s, Explored>,
         ReadStorage<'s, Hidden>,
         Read<'s, LazyUpdate>,
         Read<'s, Map>,
@@ -22,7 +23,7 @@ impl<'s> System<'s> for FovSystem {
         Entities<'s>
     );
 
-    fn run(&mut self, (transform, init, intents, player, tiles,
+    fn run(&mut self, (transform, init, intents, player, tiles, explored,
                        hidden, update, map, config, entities): Self::SystemData) {
         let (player_x, player_y, compute) = {
             let (mut player_x, mut player_y) = (0., 0.);
@@ -57,7 +58,7 @@ impl<'s> System<'s> for FovSystem {
 
 
         if compute {
-            for (transform, tile, entity) in (&transform, &tiles, &entities).join() {
+            for (transform, _, _, entity) in (&transform, &tiles, !&explored, &entities).join() {
                 let (tile_x, tile_y) =
                     (transform.translation().x, transform.translation().y);
 
@@ -65,6 +66,7 @@ impl<'s> System<'s> for FovSystem {
                     if let Some(_) = hidden.get(entity) {
                         update.remove::<Hidden>(entity);
                     }
+                    update.insert(entity, Explored);
                 } else {
                     update.insert::<Hidden>(entity, Hidden);
                 }
