@@ -2,7 +2,7 @@ use amethyst::{GameData, SimpleState, StateData, StateEvent, SimpleTrans, Trans}
 use amethyst::assets::{AssetStorage, Handle, Loader};
 use amethyst::core::Transform;
 use amethyst::core::math::Vector3;
-use amethyst::ecs::{Builder, World};
+use amethyst::ecs::{Builder, EntityBuilder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture};
 
@@ -53,88 +53,84 @@ impl SimpleState for Blobs {
     }
 }
 
+fn create_tile(the_world: &mut World, x: f32, y: f32, z: f32,
+               handle: Option<Handle<SpriteSheet>>, idx: usize) -> EntityBuilder {
+    let transform = {
+        let map = the_world.read_resource::<Map>();
+        let mut transform = Transform::default();
+        transform.set_scale(Vector3::from_element(map.ratio()));
+        transform.set_translation_xyz(x, y, z);
+
+        transform
+    };
+
+    let builder = the_world.create_entity()
+        .with(transform);
+
+    if let Some(handle) = handle {
+        let sprite_render = SpriteRender {
+            sprite_sheet: handle,
+            sprite_number: idx
+        };
+
+        builder.with(sprite_render)
+    } else {
+        builder
+    }
+}
+
 fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) -> (usize, usize) {
-    let (mut map, mut generator) = {
+    let (mut generator, map) = {
         let config = &the_world.read_resource::<MapConfig>();
-        (Map::new(config), Generator::new(config))
+        let generator = Generator::new(config);
+        let map = Map::new(config);
+
+        (generator, map)
     };
 
-    let sprite_wall = SpriteRender {
-        sprite_sheet: handle.clone(),
-        sprite_number: 1
-    };
-
-    let sprite_full = SpriteRender {
-        sprite_sheet: handle,
-        sprite_number: 0
-    };
+    the_world.add_resource(map);
 
     let start = generator.generate();
 
     let floor = Tile::new(false, true);
     let wall = Tile::new(true, false);
 
-    for y in 0..map.height() {
-        for x in 0..map.width() {
-            let mut transform = Transform::default();
-            transform.set_scale(Vector3::from_element(map.ratio()));
-            transform.set_translation_xyz(x as f32, y as f32, 0.);
-
+    for y in 0..generator.height() {
+        for x in 0..generator.width() {
             let tile = match generator.tile(x, y) {
                 TileType::None => {
-                    the_world.create_entity()
+                    create_tile(the_world, x as f32, y as f32, 0.,
+                                None, 0)
                         .with(floor.clone())
-                        .with (transform)
                         .build()
                 },
                 TileType::Wall => {
-                    the_world.create_entity()
+                    create_tile(the_world, x as f32, y as f32, 0.,
+                                Some(handle.clone()), 1)
                         .with(wall.clone())
-                        .with (transform)
-                        .with(sprite_wall.clone())
                         .build()
                 },
                 TileType::Full => {
-                    the_world.create_entity()
+                    create_tile(the_world, x as f32, y as f32, 0.,
+                                Some(handle.clone()), 0)
                         .with(wall.clone())
-                        .with (transform)
-                        .with(sprite_full.clone())
                         .build()
                 }
 
             };
 
+            let mut map = the_world.write_resource::<Map>();
             map.add_tile(tile);
         }
     }
-
-    the_world.add_resource(map);
 
     start
 }
 
 fn init_player(the_world: &mut World, player_x: usize, player_y: usize,
                handle: Handle<SpriteSheet>) {
-    let transform = {
-        let map = the_world.read_resource::<Map>();
-        let mut transform = Transform::default();
-        transform.set_scale(Vector3::from_element(map.ratio()));
-
-        transform.set_translation_xyz(player_x as f32,
-                                      player_y as f32, 1.0);
-
-        transform
-    };
-
-    let sprite_render = SpriteRender {
-        sprite_sheet: handle,
-        sprite_number: 1
-    };
-
-    the_world.create_entity()
-        .with(transform)
+    create_tile(the_world, player_x as f32, player_y as f32, 1., Some(handle), 1)
         .with(Player)
-        .with(sprite_render)
         .build();
 }
 
