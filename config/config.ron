@@ -6,5 +6,9 @@
         max_size: 10,
         max_rooms: 50,
         tile_size: 16
+    ),
+    fov: (
+        radius: 8,
+        distance: 2
     )
 )

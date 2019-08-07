@@ -4,10 +4,10 @@ use amethyst::core::Transform;
 use amethyst::core::math::Vector3;
 use amethyst::ecs::{Builder, EntityBuilder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
-use amethyst::renderer::{Camera, SpriteRender, SpriteSheet, Transparent};
+use amethyst::renderer::{Camera, SpriteRender, SpriteSheet};
 
 use crate::config::MapConfig;
-use crate::components::{Player, Tile};
+use crate::components::{Init, Player, Tile};
 use crate::map::{Generator, Map, TileType};
 use crate::sprite::{SpriteHandler, SpriteSheets};
 
@@ -28,6 +28,8 @@ impl SimpleState for Blobs {
                                              "dungeon.png", "dungeon.ron");
 
         the_world.add_resource(sprite_handler);
+
+        the_world.create_entity().with(Init).build();
 
         let (player_x, player_y) = init_map(the_world);
         init_player(the_world, player_x, player_y);

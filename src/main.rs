@@ -17,6 +17,7 @@ mod blobs;
 mod config;
 pub mod components;
 pub mod map;
+mod sprite;
 mod systems;
 
 use crate::blobs::Blobs;
@@ -50,10 +51,13 @@ pub fn main() -> amethyst::Result<()> {
         .with_bundle(input_bundle)?
         .with(systems::InputSystem::default(), "input_mapper", &["input_system"])
         .with(systems::MoveSystem, "move_system", &["input_mapper"])
+        .with(systems::FovSystem, "fov_system", &["input_mapper"])
+        .with(systems::InitSystem, "init_system", &[])
         .with_bundle(rendering_bundle)?;
 
     let mut game = Application::build(assets_dir, Blobs::default())?
         .with_resource(config.map)
+        .with_resource(config.fov)
         .build(game_data)?;
 
     game.run();

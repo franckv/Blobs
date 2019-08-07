@@ -11,6 +11,13 @@ pub struct MapConfig {
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
+pub struct FovConfig {
+    pub radius: usize,
+    pub distance: usize
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct BlobsConfig {
-    pub map: MapConfig
+    pub map: MapConfig,
+    pub fov: FovConfig,
 }
