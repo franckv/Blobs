@@ -110,6 +110,12 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
                         .with(wall.clone())
                         .build()
                 },
+                TileType::Floor => {
+                    create_tile(the_world, x as f32, y as f32, 0.,
+                                Some(handle.clone()), 2)
+                        .with(floor.clone())
+                        .build()
+                },
                 TileType::Full => {
                     create_tile(the_world, x as f32, y as f32, 0.,
                                 Some(handle.clone()), 0)

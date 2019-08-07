@@ -6,6 +6,7 @@ use rand::{Rng, thread_rng};
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
     None,
+    Floor,
     Wall,
     Full
 }
@@ -74,7 +75,7 @@ impl Generator {
                             current
                         }
                     } else {
-                        TileType::None
+                        TileType::Floor
                     };
                 self.tiles[x  + y * self.width] = tile_type;
             }
