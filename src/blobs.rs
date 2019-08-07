@@ -12,9 +12,7 @@ use crate::map::{Generator, Map, TileType};
 use crate::sprite::{SpriteHandler, SpriteSheets};
 
 #[derive(Default)]
-pub struct Blobs {
-    sprite_handler: SpriteHandler
-}
+pub struct Blobs;
 
 impl SimpleState for Blobs {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
@@ -22,15 +20,17 @@ impl SimpleState for Blobs {
 
         the_world.register::<Tile>();
 
-        self.sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Character,
+        let mut sprite_handler = SpriteHandler::default();
+
+        sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Character,
                                              "sprites.png", "sprites.ron");
-        self.sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Dungeon,
+        sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Dungeon,
                                              "dungeon.png", "dungeon.ron");
 
-        let (player_x, player_y) = init_map(
-            the_world, self.sprite_handler.get_sprite_sheet(SpriteSheets::Dungeon));
-        init_player(the_world, player_x, player_y,
-                    self.sprite_handler.get_sprite_sheet(SpriteSheets::Character));
+        the_world.add_resource(sprite_handler);
+
+        let (player_x, player_y) = init_map(the_world);
+        init_player(the_world, player_x, player_y);
         init_camera(the_world);
     }
 
@@ -72,7 +72,7 @@ fn create_tile(the_world: &mut World, x: f32, y: f32, z: f32,
     }
 }
 
-fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) -> (usize, usize) {
+fn init_map(the_world: &mut World) -> (usize, usize) {
     let (mut generator, map) = {
         let config = &the_world.read_resource::<MapConfig>();
         let generator = Generator::new(config);
@@ -82,6 +82,11 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) -> (usize, usize
     };
 
     the_world.add_resource(map);
+
+    let handle = {
+        let handler = the_world.read_resource::<SpriteHandler>();
+        handler.get_sprite_sheet(SpriteSheets::Dungeon)
+    };
 
     let start = generator.generate();
 
@@ -120,8 +125,12 @@ fn init_map(the_world: &mut World, handle: Handle<SpriteSheet>) -> (usize, usize
     start
 }
 
-fn init_player(the_world: &mut World, player_x: usize, player_y: usize,
-               handle: Handle<SpriteSheet>) {
+fn init_player(the_world: &mut World, player_x: usize, player_y: usize) {
+    let handle = {
+        let handler = the_world.read_resource::<SpriteHandler>();
+        handler.get_sprite_sheet(SpriteSheets::Character)
+    };
+
     create_tile(the_world, player_x as f32, player_y as f32, 1., Some(handle), 1)
         .with(Player)
         .build();
