@@ -1,22 +1,31 @@
+use std::collections::HashMap;
+
 use amethyst::assets::{AssetStorage, Handle, Loader};
 use amethyst::ecs::World;
 use amethyst::renderer::{ImageFormat, SpriteSheet, SpriteSheetFormat, Texture};
 
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub enum SpriteSheets {
+    Character,
+    Dungeon
+}
+
 #[derive(Default)]
 pub struct SpriteHandler {
-    sprite_sheets: Vec<Handle<SpriteSheet>>
+    sprite_sheets: HashMap<SpriteSheets, Handle<SpriteSheet>>
 }
 
 impl SpriteHandler {
     pub fn add_sprite_sheet(&mut self, the_world: &mut World,
+                            sheet: SpriteSheets,
                             file: &str, config: &str) {
         let handle = load_sprite_sheet(the_world, file, config);
 
-        self.sprite_sheets.push(handle);
+        self.sprite_sheets.insert(sheet, handle);
     }
 
-    pub fn get_sprite_sheet(&self, idx: usize) -> Handle<SpriteSheet> {
-        self.sprite_sheets[idx].clone()
+    pub fn get_sprite_sheet(&self, sheet: SpriteSheets) -> Handle<SpriteSheet> {
+        self.sprite_sheets[&sheet].clone()
     }
 }
 

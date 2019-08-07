@@ -9,7 +9,7 @@ use amethyst::renderer::{Camera, SpriteRender, SpriteSheet, Transparent};
 use crate::config::MapConfig;
 use crate::components::{Player, Tile};
 use crate::map::{Generator, Map, TileType};
-use crate::sprite::SpriteHandler;
+use crate::sprite::{SpriteHandler, SpriteSheets};
 
 #[derive(Default)]
 pub struct Blobs {
@@ -22,13 +22,15 @@ impl SimpleState for Blobs {
 
         the_world.register::<Tile>();
 
-        self.sprite_handler.add_sprite_sheet(the_world, "sprites.png", "sprites.ron");
-        self.sprite_handler.add_sprite_sheet(the_world, "dungeon.png", "dungeon.ron");
+        self.sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Character,
+                                             "sprites.png", "sprites.ron");
+        self.sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Dungeon,
+                                             "dungeon.png", "dungeon.ron");
 
-        let (player_x, player_y) = init_map(the_world,
-                                            self.sprite_handler.get_sprite_sheet(1));
+        let (player_x, player_y) = init_map(
+            the_world, self.sprite_handler.get_sprite_sheet(SpriteSheets::Dungeon));
         init_player(the_world, player_x, player_y,
-                    self.sprite_handler.get_sprite_sheet(0));
+                    self.sprite_handler.get_sprite_sheet(SpriteSheets::Character));
         init_camera(the_world);
     }
 
