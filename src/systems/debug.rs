@@ -2,7 +2,7 @@ use amethyst::core::{Hidden, Transform};
 use amethyst::ecs::{Entities, Join, ReadStorage, System};
 use amethyst::renderer::{Camera, SpriteRender};
 
-use crate::components::{Explored, Init, Intent, Player, Tile};
+use crate::components::{Explored, Init, Intent, Mob, Player, Tile};
 
 #[derive(Default)]
 pub struct DebugSystem;
@@ -14,6 +14,7 @@ impl<'s> System<'s> for DebugSystem {
         ReadStorage<'s, Hidden>,
         ReadStorage<'s, Init>,
         ReadStorage<'s, Intent>,
+        ReadStorage<'s, Mob>,
         ReadStorage<'s, Player>,
         ReadStorage<'s, SpriteRender>,
         ReadStorage<'s, Tile>,
@@ -21,7 +22,7 @@ impl<'s> System<'s> for DebugSystem {
         Entities<'s>
     );
 
-    fn run(&mut self, (camera, explored, hidden, init, intent, player,
+    fn run(&mut self, (camera, explored, hidden, init, intent, mob, player,
                        sprite, tile, transform, entities): Self::SystemData) {
         for entity in entities.join() {
             debug!("{:?}: [", entity);
@@ -38,6 +39,9 @@ impl<'s> System<'s> for DebugSystem {
                 debug!("  {:?}, ", c);
             }
             if let Some(c) = intent.get(entity) {
+                debug!("  {:?}, ", c);
+            }
+            if let Some(c) = mob.get(entity) {
                 debug!("  {:?}, ", c);
             }
             if let Some(c) = player.get(entity) {

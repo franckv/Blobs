@@ -90,7 +90,7 @@ impl Generator {
         self.tiles[x + y * self.width]
     }
 
-    pub fn generate(&mut self) -> (usize, usize) {
+    pub fn generate(&mut self) -> Vec<Rect> {
         let mut rng = thread_rng();
 
         let mut rooms = Vec::<Rect>::new();
@@ -160,6 +160,6 @@ impl Generator {
             }
         }
 
-        rooms[0].center()
+        rooms
     }
 }

@@ -9,12 +9,14 @@ use amethyst::renderer::{
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SpriteSheets {
     Character,
-    Dungeon
+    Dungeon,
+    Mobs
 }
 
 #[derive(Copy, Clone)]
 pub enum Sprite {
     Player,
+    Blob,
     Wall,
     Floor,
     Full
@@ -40,6 +42,12 @@ impl SpriteHandler {
                 SpriteRender {
                     sprite_sheet: self.sprite_sheets[&SpriteSheets::Character].clone(),
                     sprite_number: 1
+                }
+            },
+            Sprite::Blob => {
+                SpriteRender {
+                    sprite_sheet: self.sprite_sheets[&SpriteSheets::Mobs].clone(),
+                    sprite_number: 0
                 }
             },
             Sprite::Wall => {

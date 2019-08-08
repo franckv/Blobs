@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
 use amethyst::core::{Hidden, Transform};
-use amethyst::ecs::{Entity, Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
+use amethyst::ecs::{Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
 
 use crate::config::FovConfig;
 use crate::geometry;
 use crate::map::Map;
-use crate::components::{Explored, Init, Intent, Player, Tile};
+use crate::components::{Explored, Init, Intent, Mob, Player, Tile};
 
 #[derive(Default)]
 pub struct FovSystem;
@@ -16,6 +16,7 @@ impl<'s> System<'s> for FovSystem {
         ReadStorage<'s, Transform>,
         ReadStorage<'s, Init>,
         ReadStorage<'s, Intent>,
+        ReadStorage<'s, Mob>,
         ReadStorage<'s, Player>,
         ReadStorage<'s, Tile>,
         ReadStorage<'s, Explored>,
@@ -26,7 +27,7 @@ impl<'s> System<'s> for FovSystem {
         Entities<'s>
     );
 
-    fn run(&mut self, (transform, init, intents, player, tiles, explored,
+    fn run(&mut self, (transform, init, intents, mob, player, tiles, explored,
                        hidden, update, map, config, entities): Self::SystemData) {
         let (player_x, player_y, compute) = {
             let (mut player_x, mut player_y) = (0., 0.);
@@ -65,12 +66,27 @@ impl<'s> System<'s> for FovSystem {
                                map.width(), map.height(),
                                &map, &tiles, config.radius);
 
-            for (_, _, entity) in (&tiles, !&explored, &entities).join() {
-                if fov.contains(&entity) {
+            for (_, _, transform, entity) in (
+                &tiles, !&explored, &transform, &entities).join() {
+                let x = transform.translation().x as usize;
+                let y = transform.translation().y as usize;
+                if fov.contains(&(x, y)) {
                     if let Some(_) = hidden.get(entity) {
                         update.remove::<Hidden>(entity);
                     }
                     update.insert(entity, Explored);
+                } else {
+                    update.insert::<Hidden>(entity, Hidden);
+                }
+            }
+
+            for (_, transform, entity) in (&mob, &transform, &entities).join() {
+                let x = transform.translation().x as usize;
+                let y = transform.translation().y as usize;
+                if fov.contains(&(x, y)) {
+                    if let Some(_) = hidden.get(entity) {
+                        update.remove::<Hidden>(entity);
+                    }
                 } else {
                     update.insert::<Hidden>(entity, Hidden);
                 }
@@ -82,7 +98,7 @@ impl<'s> System<'s> for FovSystem {
 fn generate_fov<'s>(player_x: f32, player_y: f32,
                     width: usize, height: usize,
                     map: &Map, tiles: &ReadStorage<'s, Tile>,
-                    radius: usize) -> HashSet<Entity> {
+                    radius: usize) -> HashSet<(usize, usize)> {
     let mut fov = HashSet::new();
 
     geometry::draw_circle(
@@ -95,11 +111,11 @@ fn generate_fov<'s>(player_x: f32, player_y: f32,
                     let tile = tiles.get(entity).unwrap();
 
                     if !tile.is_transparent() {
-                        fov.insert(entity);
+                        fov.insert((px as usize, py as usize));
                         return false;
                     }
 
-                    fov.insert(entity);
+                    fov.insert((px as usize, py as usize));
                     true
                 });
 

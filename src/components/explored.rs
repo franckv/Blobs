@@ -1,8 +1,8 @@
-use amethyst::ecs::{Component, DenseVecStorage};
+use amethyst::ecs::{Component, NullStorage};
 
 #[derive(Clone, Debug, Default)]
 pub struct Explored;
 
 impl Component for Explored {
-    type Storage = DenseVecStorage<Self>;
+    type Storage = NullStorage<Self>;
 }

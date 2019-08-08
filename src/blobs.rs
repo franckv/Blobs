@@ -23,12 +23,15 @@ impl SimpleState for Blobs {
                                              "sprites.png", "sprites.ron");
         sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Dungeon,
                                              "dungeon.png", "dungeon.ron");
+        sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Mobs,
+                                             "mobs.png", "mobs.ron");
 
         the_world.add_resource(sprite_handler);
 
         the_world.create_entity().with(Init).build();
 
         let (player_x, player_y) = init_map(the_world);
+
         prefab::create_player(the_world, player_x, player_y);
         init_camera(the_world);
     }
@@ -56,7 +59,7 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
 
     the_world.add_resource(map);
 
-    let start = generator.generate();
+    let rooms = generator.generate();
 
     for y in 0..generator.height() {
         for x in 0..generator.width() {
@@ -67,7 +70,12 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
         }
     }
 
-    start
+    for room in rooms.iter().skip(1) {
+        let c = room.center();
+        prefab::create_mob(the_world, c.0, c.1);
+    }
+
+    rooms[0].center()
 }
 
 fn init_camera(the_world: &mut World) {

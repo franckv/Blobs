@@ -1,8 +1,8 @@
 use amethyst::ecs::{Component, NullStorage};
 
 #[derive(Debug, Default)]
-pub struct Init;
-impl Component for Init {
+pub struct Mob;
+impl Component for Mob {
     type Storage = NullStorage<Self>;
 }
 
