@@ -21,7 +21,10 @@ impl<'s> System<'s> for MoveSystem {
            Self::SystemData) {
         for (transform, intent, entity) in
             (&mut transform, &intents, &entities).join() {
-            let (x, y) = (transform.translation().x, transform.translation().y);
+            let (x, y, z) = (
+                transform.translation().x,
+                transform.translation().y,
+                transform.translation().z);
 
             if let Action::Move(dir) = intent.action() {
                 let (dx, dy) = match dir {
@@ -41,7 +44,7 @@ impl<'s> System<'s> for MoveSystem {
 
                 if map.in_bound(x + dx, y + dy) &&
                     !Self::is_blocked(x + dx, y + dy, &map, &tiles) {
-                    transform.set_translation_xyz(x + dx, y + dy, 0.);
+                    transform.set_translation_xyz(x + dx, y + dy, z);
                 }
 
             }
