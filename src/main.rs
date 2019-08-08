@@ -18,6 +18,7 @@ mod config;
 pub mod components;
 pub mod geometry;
 pub mod map;
+mod prefab;
 mod sprite;
 mod systems;
 

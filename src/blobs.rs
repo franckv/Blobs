@@ -1,14 +1,14 @@
 use amethyst::{GameData, SimpleState, StateData, StateEvent, SimpleTrans, Trans};
 use amethyst::core::Transform;
-use amethyst::core::math::Vector3;
-use amethyst::ecs::{Builder, EntityBuilder, World};
+use amethyst::ecs::{Builder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::Camera;
 
 use crate::config::MapConfig;
-use crate::components::{Init, Player, Tile};
-use crate::map::{Generator, Map, TileType};
-use crate::sprite::{Sprite, SpriteHandler, SpriteSheets};
+use crate::components::Init;
+use crate::map::{Generator, Map};
+use crate::prefab;
+use crate::sprite::{SpriteHandler, SpriteSheets};
 
 #[derive(Default)]
 pub struct Blobs;
@@ -16,8 +16,6 @@ pub struct Blobs;
 impl SimpleState for Blobs {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let the_world = data.world;
-
-        the_world.register::<Tile>();
 
         let mut sprite_handler = SpriteHandler::default();
 
@@ -31,7 +29,7 @@ impl SimpleState for Blobs {
         the_world.create_entity().with(Init).build();
 
         let (player_x, player_y) = init_map(the_world);
-        init_player(the_world, player_x, player_y);
+        prefab::create_player(the_world, player_x, player_y);
         init_camera(the_world);
     }
 
@@ -44,35 +42,6 @@ impl SimpleState for Blobs {
         }
 
         Trans::None
-    }
-}
-
-fn create_tile(the_world: &mut World, x: f32, y: f32, z: f32,
-               sprite: Option<Sprite>) -> EntityBuilder {
-    let transform = {
-        let map = the_world.read_resource::<Map>();
-        let mut transform = Transform::default();
-        transform.set_scale(Vector3::from_element(map.ratio()));
-        transform.set_translation_xyz(x, y, z);
-
-        transform
-    };
-
-    let sprite_render = match sprite {
-        Some(sprite) => {
-            let handler = the_world.read_resource::<SpriteHandler>();
-            Some(handler.get_sprite(sprite))
-        },
-        None => None
-    };
-
-    let builder = the_world.create_entity()
-        .with(transform);
-
-    if let Some(sprite_render) = sprite_render {
-        builder.with(sprite_render)
-    } else {
-        builder
     }
 }
 
@@ -89,34 +58,9 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
 
     let start = generator.generate();
 
-    let floor = Tile::new(false, true);
-    let wall = Tile::new(true, false);
-
     for y in 0..generator.height() {
         for x in 0..generator.width() {
-            let tile = match generator.tile(x, y) {
-                TileType::None => {
-                    create_tile(the_world, x as f32, y as f32, 0., None)
-                        .with(floor.clone())
-                        .build()
-                },
-                TileType::Wall => {
-                    create_tile(the_world, x as f32, y as f32, 0., Some(Sprite::Wall))
-                        .with(wall.clone())
-                        .build()
-                },
-                TileType::Floor => {
-                    create_tile(the_world, x as f32, y as f32, 0., Some(Sprite::Floor))
-                        .with(floor.clone())
-                        .build()
-                },
-                TileType::Full => {
-                    create_tile(the_world, x as f32, y as f32, 0., Some(Sprite::Full))
-                        .with(wall.clone())
-                        .build()
-                }
-
-            };
+            let tile = prefab::create_tile(the_world, x, y, generator.tile(x, y));
 
             let mut map = the_world.write_resource::<Map>();
             map.add_tile(tile);
@@ -124,12 +68,6 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
     }
 
     start
-}
-
-fn init_player(the_world: &mut World, player_x: usize, player_y: usize) {
-    create_tile(the_world, player_x as f32, player_y as f32, 1., Some(Sprite::Player))
-        .with(Player)
-        .build();
 }
 
 fn init_camera(the_world: &mut World) {
