@@ -54,7 +54,8 @@ pub fn main() -> amethyst::Result<()> {
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
         .with(systems::InputSystem::default(), "input_mapper", &["input_system"])
-        .with(systems::MoveSystem, "move_system", &["input_mapper"])
+        .with(systems::AttackSystem, "attack_system", &["input_mapper"])
+        .with(systems::MoveSystem, "move_system", &["attack_system", "input_mapper"])
         .with(systems::FovSystem, "fov_system", &["move_system"])
         .with(systems::InitSystem, "init_system", &["fov_system"])
         .with_bundle(rendering_bundle)?;
