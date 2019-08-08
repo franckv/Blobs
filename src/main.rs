@@ -13,16 +13,14 @@ use amethyst::utils::application_root_dir;
 
 use log::LevelFilter;
 
-mod blobs;
 mod config;
 pub mod components;
-pub mod geometry;
 pub mod map;
-mod prefab;
-mod sprite;
+mod state;
 mod systems;
+pub mod utils;
 
-use crate::blobs::Blobs;
+use crate::state::GameplayState;
 use crate::config::BlobsConfig;
 
 pub fn main() -> amethyst::Result<()> {
@@ -66,7 +64,7 @@ pub fn main() -> amethyst::Result<()> {
             systems::DebugSystem, "debug_system", &["init_system", "fov_system"]);
     }
 
-    let mut game = Application::build(assets_dir, Blobs::default())?
+    let mut game = Application::build(assets_dir, GameplayState::default())?
         .with_resource(config.map)
         .with_resource(config.fov)
         .build(game_data)?;

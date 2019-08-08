@@ -4,7 +4,7 @@ use amethyst::core::{Hidden, Transform};
 use amethyst::ecs::{Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
 
 use crate::config::FovConfig;
-use crate::geometry;
+use crate::utils::geometry;
 use crate::map::Map;
 use crate::components::{Explored, Init, Intent, Mob, Player, Tile};
 

@@ -4,8 +4,7 @@ use amethyst::ecs::{Builder, Entity, EntityBuilder, World};
 
 use crate::components::{Mob, Player, Tile};
 use crate::map::{Map, TileType};
-use crate::sprite::Sprite;
-use crate::sprite::SpriteHandler;
+use crate::utils::sprite::{Sprite, SpriteHandler};
 
 pub fn create_player(the_world: &mut World,
                      player_x: usize, player_y: usize) -> Entity {

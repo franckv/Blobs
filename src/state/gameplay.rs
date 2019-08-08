@@ -7,13 +7,13 @@ use amethyst::renderer::Camera;
 use crate::config::MapConfig;
 use crate::components::Init;
 use crate::map::{Generator, Map};
-use crate::prefab;
-use crate::sprite::{SpriteHandler, SpriteSheets};
+use crate::utils::prefab;
+use crate::utils::sprite::{SpriteHandler, SpriteSheets};
 
 #[derive(Default)]
-pub struct Blobs;
+pub struct GameplayState;
 
-impl SimpleState for Blobs {
+impl SimpleState for GameplayState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let the_world = data.world;
 
