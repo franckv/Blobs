@@ -2,12 +2,22 @@ use std::collections::HashMap;
 
 use amethyst::assets::{AssetStorage, Handle, Loader};
 use amethyst::ecs::World;
-use amethyst::renderer::{ImageFormat, SpriteSheet, SpriteSheetFormat, Texture};
+use amethyst::renderer::{
+    ImageFormat, SpriteRender, SpriteSheet,
+    SpriteSheetFormat, Texture};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SpriteSheets {
     Character,
     Dungeon
+}
+
+#[derive(Copy, Clone)]
+pub enum Sprite {
+    Player,
+    Wall,
+    Floor,
+    Full
 }
 
 #[derive(Default)]
@@ -24,8 +34,33 @@ impl SpriteHandler {
         self.sprite_sheets.insert(sheet, handle);
     }
 
-    pub fn get_sprite_sheet(&self, sheet: SpriteSheets) -> Handle<SpriteSheet> {
-        self.sprite_sheets[&sheet].clone()
+    pub fn get_sprite(&self, sprite: Sprite) -> SpriteRender {
+        match sprite {
+            Sprite::Player => {
+                SpriteRender {
+                    sprite_sheet: self.sprite_sheets[&SpriteSheets::Character].clone(),
+                    sprite_number: 1
+                }
+            },
+            Sprite::Wall => {
+                SpriteRender {
+                    sprite_sheet: self.sprite_sheets[&SpriteSheets::Dungeon].clone(),
+                    sprite_number: 1
+                }
+            },
+            Sprite::Floor => {
+                SpriteRender {
+                    sprite_sheet: self.sprite_sheets[&SpriteSheets::Dungeon].clone(),
+                    sprite_number: 2
+                }
+            },
+            Sprite::Full => {
+                SpriteRender {
+                    sprite_sheet: self.sprite_sheets[&SpriteSheets::Dungeon].clone(),
+                    sprite_number: 0
+                }
+            }
+        }
     }
 }
 

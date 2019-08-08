@@ -1,15 +1,14 @@
 use amethyst::{GameData, SimpleState, StateData, StateEvent, SimpleTrans, Trans};
-use amethyst::assets::Handle;
 use amethyst::core::Transform;
 use amethyst::core::math::Vector3;
 use amethyst::ecs::{Builder, EntityBuilder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
-use amethyst::renderer::{Camera, SpriteRender, SpriteSheet};
+use amethyst::renderer::Camera;
 
 use crate::config::MapConfig;
 use crate::components::{Init, Player, Tile};
 use crate::map::{Generator, Map, TileType};
-use crate::sprite::{SpriteHandler, SpriteSheets};
+use crate::sprite::{Sprite, SpriteHandler, SpriteSheets};
 
 #[derive(Default)]
 pub struct Blobs;
@@ -49,7 +48,7 @@ impl SimpleState for Blobs {
 }
 
 fn create_tile(the_world: &mut World, x: f32, y: f32, z: f32,
-               handle: Option<Handle<SpriteSheet>>, idx: usize) -> EntityBuilder {
+               sprite: Option<Sprite>) -> EntityBuilder {
     let transform = {
         let map = the_world.read_resource::<Map>();
         let mut transform = Transform::default();
@@ -59,15 +58,18 @@ fn create_tile(the_world: &mut World, x: f32, y: f32, z: f32,
         transform
     };
 
+    let sprite_render = match sprite {
+        Some(sprite) => {
+            let handler = the_world.read_resource::<SpriteHandler>();
+            Some(handler.get_sprite(sprite))
+        },
+        None => None
+    };
+
     let builder = the_world.create_entity()
         .with(transform);
 
-    if let Some(handle) = handle {
-        let sprite_render = SpriteRender {
-            sprite_sheet: handle,
-            sprite_number: idx
-        };
-
+    if let Some(sprite_render) = sprite_render {
         builder.with(sprite_render)
     } else {
         builder
@@ -85,11 +87,6 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
 
     the_world.add_resource(map);
 
-    let handle = {
-        let handler = the_world.read_resource::<SpriteHandler>();
-        handler.get_sprite_sheet(SpriteSheets::Dungeon)
-    };
-
     let start = generator.generate();
 
     let floor = Tile::new(false, true);
@@ -99,26 +96,22 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
         for x in 0..generator.width() {
             let tile = match generator.tile(x, y) {
                 TileType::None => {
-                    create_tile(the_world, x as f32, y as f32, 0.,
-                                None, 0)
+                    create_tile(the_world, x as f32, y as f32, 0., None)
                         .with(floor.clone())
                         .build()
                 },
                 TileType::Wall => {
-                    create_tile(the_world, x as f32, y as f32, 0.,
-                                Some(handle.clone()), 1)
+                    create_tile(the_world, x as f32, y as f32, 0., Some(Sprite::Wall))
                         .with(wall.clone())
                         .build()
                 },
                 TileType::Floor => {
-                    create_tile(the_world, x as f32, y as f32, 0.,
-                                Some(handle.clone()), 2)
+                    create_tile(the_world, x as f32, y as f32, 0., Some(Sprite::Floor))
                         .with(floor.clone())
                         .build()
                 },
                 TileType::Full => {
-                    create_tile(the_world, x as f32, y as f32, 0.,
-                                Some(handle.clone()), 0)
+                    create_tile(the_world, x as f32, y as f32, 0., Some(Sprite::Full))
                         .with(wall.clone())
                         .build()
                 }
@@ -134,12 +127,7 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
 }
 
 fn init_player(the_world: &mut World, player_x: usize, player_y: usize) {
-    let handle = {
-        let handler = the_world.read_resource::<SpriteHandler>();
-        handler.get_sprite_sheet(SpriteSheets::Character)
-    };
-
-    create_tile(the_world, player_x as f32, player_y as f32, 1., Some(handle), 1)
+    create_tile(the_world, player_x as f32, player_y as f32, 1., Some(Sprite::Player))
         .with(Player)
         .build();
 }
