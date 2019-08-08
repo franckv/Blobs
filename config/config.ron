@@ -8,7 +8,7 @@
         tile_size: 16
     ),
     fov: (
-        radius: 8,
+        radius: 10,
         distance: 2
     )
 )

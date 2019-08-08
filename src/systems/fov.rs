@@ -1,7 +1,10 @@
+use std::collections::HashSet;
+
 use amethyst::core::{Hidden, Transform};
-use amethyst::ecs::{Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
+use amethyst::ecs::{Entity, Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
 
 use crate::config::FovConfig;
+use crate::geometry;
 use crate::map::Map;
 use crate::components::{Explored, Init, Intent, Player, Tile};
 
@@ -58,11 +61,12 @@ impl<'s> System<'s> for FovSystem {
 
 
         if compute {
-            for (transform, _, _, entity) in (&transform, &tiles, !&explored, &entities).join() {
-                let (tile_x, tile_y) =
-                    (transform.translation().x, transform.translation().y);
+            let fov = generate_fov(player_x, player_y,
+                               map.width(), map.height(),
+                               &map, &tiles, config.radius);
 
-                if is_in_fov(tile_x, tile_y, player_x, player_y, &config) {
+            for (_, _, entity) in (&tiles, !&explored, &entities).join() {
+                if fov.contains(&entity) {
                     if let Some(_) = hidden.get(entity) {
                         update.remove::<Hidden>(entity);
                     }
@@ -75,39 +79,33 @@ impl<'s> System<'s> for FovSystem {
     }
 }
 
-fn is_in_fov(tile_x: f32, tile_y: f32,
-             player_x: f32, player_y: f32,
-             config: &FovConfig) -> bool {
-    let radius = config.radius as f32;
-    let distance = config.distance;
+fn generate_fov<'s>(player_x: f32, player_y: f32,
+                    width: usize, height: usize,
+                    map: &Map, tiles: &ReadStorage<'s, Tile>,
+                    radius: usize) -> HashSet<Entity> {
+    let mut fov = HashSet::new();
 
-    let d = match distance {
-        0 => {
-            manhattan_distance(tile_x, tile_y, player_x, player_y)
-        },
-        1 => {
-            diagonal_distance(tile_x, tile_y, player_x, player_y)
-        },
-        _ => {
-            circle_distance(tile_x, tile_y, player_x, player_y)
-        }
-    };
+    geometry::draw_circle(
+        player_x as i32, player_y as i32,
+        radius as i32, width as i32, height as i32, |bx, by| {
+            geometry::draw_line(
+                player_x as i32, player_y as i32,
+                bx, by, |px, py| {
+                    let entity = map.tile(px as usize, py as usize);
+                    let tile = tiles.get(entity).unwrap();
 
-    if d < radius {
-        true
-    } else {
-        false
-    }
+                    if !tile.is_transparent() {
+                        fov.insert(entity);
+                        return false;
+                    }
+
+                    fov.insert(entity);
+                    true
+                });
+
+            true
+        });
+
+    fov
 }
 
-fn manhattan_distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
-    (x1 - x2).abs() + (y1 - y2).abs()
-}
-
-fn diagonal_distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
-    (x1 - x2).abs().max((y1 - y2).abs())
-}
-
-fn circle_distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
-    (((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2))).sqrt()
-}

@@ -16,6 +16,7 @@ use log::LevelFilter;
 mod blobs;
 mod config;
 pub mod components;
+pub mod geometry;
 pub mod map;
 mod sprite;
 mod systems;
