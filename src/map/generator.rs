@@ -111,9 +111,7 @@ impl Generator {
 
             if !intersect {
                 self.dig(&r, true);
-                let (center_x, center_y) = r.center();
                 rooms.push(r);
-                println!("{}/{} [{}/{}] ({}/{})", x, y, w, h, center_x, center_y);
 
                 let n = rooms.len();
                 if n > 1 {

@@ -1,6 +1,6 @@
 use amethyst::ecs::{Component, DenseVecStorage};
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {
     Left,
     Right,
@@ -8,12 +8,13 @@ pub enum Direction {
     Down
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Action {
     None,
     Move(Direction)
 }
 
+#[derive(Debug)]
 pub struct Intent {
     action: Action
 }

@@ -1,6 +1,11 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Deserialize, Serialize)]
+pub struct LogConfig {
+    pub debug: bool
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct MapConfig {
     pub width: usize,
     pub height: usize,
@@ -18,6 +23,7 @@ pub struct FovConfig {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct BlobsConfig {
+    pub log: LogConfig,
     pub map: MapConfig,
     pub fov: FovConfig,
 }

@@ -25,10 +25,6 @@ use crate::blobs::Blobs;
 use crate::config::BlobsConfig;
 
 pub fn main() -> amethyst::Result<()> {
-    let mut logger_config = LoggerConfig::default();
-    logger_config.level_filter = LevelFilter::Warn;
-    amethyst::start_logger(logger_config);
-
     let app_root = application_root_dir()?;
     let assets_dir = app_root.join("assets");
     let config_dir = app_root.join("config");
@@ -37,6 +33,14 @@ pub fn main() -> amethyst::Result<()> {
     let config_path = config_dir.join("config.ron");
 
     let config = BlobsConfig::load(&config_path);
+
+    let mut logger_config = LoggerConfig::default();
+    logger_config.level_filter = if config.log.debug {
+        LevelFilter::Debug
+    } else {
+        LevelFilter::Info
+    };
+    amethyst::start_logger(logger_config);
 
     let rendering_bundle = RenderingBundle::<DefaultBackend>::new()
         .with_plugin(
@@ -47,14 +51,19 @@ pub fn main() -> amethyst::Result<()> {
     let input_bundle = InputBundle::<StringBindings>::new()
         .with_bindings_from_file(binding_path)?;
 
-    let game_data = GameDataBuilder::default()
+    let mut game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
         .with(systems::InputSystem::default(), "input_mapper", &["input_system"])
         .with(systems::MoveSystem, "move_system", &["input_mapper"])
-        .with(systems::FovSystem, "fov_system", &["input_mapper"])
-        .with(systems::InitSystem, "init_system", &[])
+        .with(systems::FovSystem, "fov_system", &["move_system"])
+        .with(systems::InitSystem, "init_system", &["fov_system"])
         .with_bundle(rendering_bundle)?;
+
+    if config.log.debug {
+        game_data = game_data.with(
+            systems::DebugSystem, "debug_system", &["init_system", "fov_system"]);
+    }
 
     let mut game = Application::build(assets_dir, Blobs::default())?
         .with_resource(config.map)

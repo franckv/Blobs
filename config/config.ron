@@ -1,4 +1,7 @@
 (
+    log: (
+        debug: false
+    ),
     map: (
         height: 32,
         width: 32,

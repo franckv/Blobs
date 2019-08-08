@@ -1,6 +1,6 @@
 use amethyst::ecs::{Component, DenseVecStorage};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Tile {
     block: bool,
     transparent: bool
