@@ -1,3 +1,10 @@
+#[derive(Copy, Clone)]
+pub enum Distance {
+    Manhattan,
+    Diagonal,
+    Circle
+}
+
 pub fn draw_line<F>(x1: i32, y1:i32, x2: i32, y2: i32, mut f:F)
     where F: FnMut(i32, i32) -> bool {
         let dx = (x2 - x1).abs();
@@ -27,42 +34,72 @@ pub fn draw_line<F>(x1: i32, y1:i32, x2: i32, y2: i32, mut f:F)
         }
     }
 
+pub fn draw_circle_algo<F>(x: i32, y: i32, radius: i32,
+                  width: i32, height: i32, algo: Distance,
+                  mut f: F) where F: FnMut(i32, i32) -> bool {
+
+    let mut dx = 0;
+    let mut dy = radius;
+
+    while dx <= dy {
+        if !f(x + dy, y + dx) {return};
+        if !f(x + dx, y + dy) {return};
+        if !f(x - dx, y + dy) {return};
+        if !f(x - dy, y + dx) {return};
+        if !f(x - dy, y - dx) {return};
+        if !f(x - dx, y - dy) {return};
+        if !f(x + dx, y - dy) {return};
+        if !f(x + dy, y - dx) {return};
+
+        let r1 = distance(x, y, x + dx + 1, y + dy, algo);
+        let r2 = distance(x, y, x + dx + 1, y + dy - 1, algo);
+
+        if (r1 - radius as f32).abs() < (r2 - radius as f32).abs() {
+            dx += 1;
+        } else {
+            dx += 1;
+            dy -= 1;
+        }
+    }
+}
+
 pub fn draw_circle<F>(x: i32, y: i32, radius: i32,
                   width: i32, height: i32,
                   mut f: F) where F: FnMut(i32, i32) -> bool {
-    let left = (x - radius).max(0);
-    let right = (x + radius).min(width);
-    let top = (y + radius).min(height);
-    let bottom = (y - radius).max(0);
 
-    let mut stop = false;
-    for i in bottom..=top {
-        if !f(left, i) || !f(right, i) {
-            stop = true;
-            break;
+    let mut dx = 0;
+    let mut dy = radius;
+
+    let mut d = 3 - 2 * radius;
+
+    while dx <= dy {
+        if !f(x + dy, y + dx) {return};
+        if !f(x + dx, y + dy) {return};
+        if !f(x - dx, y + dy) {return};
+        if !f(x - dy, y + dx) {return};
+        if !f(x - dy, y - dx) {return};
+        if !f(x - dx, y - dy) {return};
+        if !f(x + dx, y - dy) {return};
+        if !f(x + dy, y - dx) {return};
+
+        if d < 0 {
+            d = d + 4 * dx + 6;
+            dx += 1;
+        } else {
+            d = d + 4 * (dx - dy) + 10;
+            dx += 1;
+            dy -= 1;
         }
     }
+}
 
-    if !stop {
-        for i in left..=right {
-            if !f(i, bottom) || !f(i, top) {
-                break;
-            }
-        }
+pub fn distance(x1: i32, y1: i32, x2: i32, y2: i32, algo: Distance) -> f32 {
+    match algo {
+        Distance::Manhattan => (x1 - x2).abs() as f32 + (y1 - y2).abs() as f32,
+        Distance::Diagonal => (x1 - x2).abs().max((y1 - y2).abs()) as f32,
+        Distance::Circle => (((x1 - x2) * (x1 - x2)) as f32 +
+                             ((y1 - y2) * (y1 - y2)) as f32).sqrt()
     }
-}
-
-
-pub fn manhattan_distance(x1: i32, y1: i32, x2: i32, y2: i32) -> i32 {
-    (x1 - x2).abs() + (y1 - y2).abs()
-}
-
-pub fn diagonal_distance(x1: i32, y1: i32, x2: i32, y2: i32) -> i32 {
-    (x1 - x2).abs().max((y1 - y2).abs())
-}
-
-pub fn circle_distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
-    (((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2))).sqrt()
 }
 
 #[cfg(test)]
