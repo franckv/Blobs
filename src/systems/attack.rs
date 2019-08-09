@@ -88,9 +88,9 @@ fn attack<'s>(attacker: &Entity, defender: &Entity,
 
             if let Some(health) = health.get_mut(*defender) {
                 health.damage(damage_d);
-                let name = utils::get_name(*attacker, "Defender", &name);
+                let name = utils::get_name(*defender, "Defender", &name);
                 logs.push(
-                    format!("{} take {} damage ({}/{})",
+                    format!("{} takes {} damage ({}/{})",
                     name, damage_d, health.current(), health.max()));
                 if health.current() == 0 {
                     dead.insert(*defender, Dead).unwrap();
@@ -101,7 +101,7 @@ fn attack<'s>(attacker: &Entity, defender: &Entity,
                 health.damage(damage_a);
                 let name = utils::get_name(*attacker, "Attacker", &name);
                 logs.push(
-                    format!("{} take {} damage ({}/{})",
+                    format!("{} takes {} damage ({}/{})",
                     name, damage_a, health.current(), health.max()));
                 if health.current() == 0 {
                     dead.insert(*attacker, Dead).unwrap();
