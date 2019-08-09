@@ -5,6 +5,7 @@ pub use self::health::Health;
 pub use self::init::Init;
 pub use self::intent::{Direction, Action, Intent};
 pub use self::mob::Mob;
+pub use self::name::Name;
 pub use self::player::Player;
 pub use self::tile::Tile;
 
@@ -15,5 +16,6 @@ mod health;
 mod init;
 mod intent;
 mod mob;
+mod name;
 mod player;
 mod tile;
