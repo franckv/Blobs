@@ -16,6 +16,14 @@ pub struct MapConfig {
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
+pub struct PanelConfig {
+    pub bottom: usize,
+    pub right: usize,
+    pub bottom_lines: usize,
+    pub font_size: usize
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct FovConfig {
     pub radius: usize,
     pub distance: usize
@@ -25,5 +33,6 @@ pub struct FovConfig {
 pub struct BlobsConfig {
     pub log: LogConfig,
     pub map: MapConfig,
+    pub panel: PanelConfig,
     pub fov: FovConfig,
 }

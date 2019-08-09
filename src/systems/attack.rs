@@ -1,10 +1,13 @@
 use amethyst::core::{Hidden, Transform};
-use amethyst::ecs::{Entity, Entities, Join, ReadStorage, System, WriteStorage};
+use amethyst::ecs::{
+    Entity, Entities, Join, ReadStorage,
+    System, WriteExpect, WriteStorage};
 
 use super::utils;
 use crate::components::{
     Action, Dead, Direction, Fighter,
     Health, Intent, Mob, Name, Player};
+use crate::ui::MessageLog;
 
 #[derive(Default)]
 pub struct AttackSystem;
@@ -20,12 +23,13 @@ impl<'s> System<'s> for AttackSystem {
         ReadStorage<'s, Name>,
         ReadStorage<'s, Player>,
         ReadStorage<'s, Transform>,
+        WriteExpect<'s, MessageLog>,
         Entities<'s>
     );
 
     fn run(&mut self, (mut dead, fighter, mut health, hidden,
                        mut intents, mob, name, player, transform,
-                       entities): Self::SystemData) {
+                       mut logs, entities): Self::SystemData) {
         let mut remove_intent = None;
 
         for (player_trans, intent, player_entity) in (
@@ -57,7 +61,8 @@ impl<'s> System<'s> for AttackSystem {
                     if x + dx == mob_x && y + dy == mob_y {
                         remove_intent = Some(player_entity);
                         attack(&player_entity, &mob_entity,
-                               &fighter, &mut health, &name, &mut dead);
+                               &fighter, &mut health, &mut logs,
+                               &name, &mut dead);
                         break;
                     }
                 }
@@ -73,19 +78,20 @@ impl<'s> System<'s> for AttackSystem {
 fn attack<'s>(attacker: &Entity, defender: &Entity,
               fighter: &ReadStorage<'s, Fighter>,
               health: &mut WriteStorage<'s, Health>,
+              logs: &mut MessageLog,
               name: &ReadStorage<'s, Name>,
               dead: &mut WriteStorage<'s, Dead>) {
     if let (Some(attack), Some(defense)) =
         (fighter.get(*attacker), fighter.get(*defender)) {
-            println!("Attack!");
             let damage_d = attack.attack() - defense.defense();
             let damage_a = defense.attack() - attack.defense();
 
             if let Some(health) = health.get_mut(*defender) {
                 health.damage(damage_d);
                 let name = utils::get_name(*attacker, "Defender", &name);
-                println!("{} take {} damage ({}/{})",
-                name, damage_d, health.current(), health.max());
+                logs.push(
+                    format!("{} take {} damage ({}/{})",
+                    name, damage_d, health.current(), health.max()));
                 if health.current() == 0 {
                     dead.insert(*defender, Dead).unwrap();
                 }
@@ -94,8 +100,9 @@ fn attack<'s>(attacker: &Entity, defender: &Entity,
             if let Some(health) = health.get_mut(*attacker) {
                 health.damage(damage_a);
                 let name = utils::get_name(*attacker, "Attacker", &name);
-                println!("{} take {} damage ({}/{})",
-                name, damage_a, health.current(), health.max());
+                logs.push(
+                    format!("{} take {} damage ({}/{})",
+                    name, damage_a, health.current(), health.max()));
                 if health.current() == 0 {
                     dead.insert(*attacker, Dead).unwrap();
                 }

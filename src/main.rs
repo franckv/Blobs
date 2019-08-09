@@ -72,8 +72,7 @@ pub fn main() -> amethyst::Result<()> {
     }
 
     let mut game = Application::build(assets_dir, GameplayState::default())?
-        .with_resource(config.map)
-        .with_resource(config.fov)
+        .with_resource(config)
         .build(game_data)?;
 
     game.run();

@@ -46,7 +46,9 @@ fn create_entity(the_world: &mut World, x: usize, y: usize, z: usize,
         let map = the_world.read_resource::<Map>();
         let mut transform = Transform::default();
         transform.set_scale(Vector3::from_element(ratio * map.ratio()));
-        transform.set_translation_xyz(x as f32, y as f32, z as f32);
+        transform.set_translation_xyz(x as f32,
+                                      y as f32,
+                                      z as f32);
 
         transform
     };

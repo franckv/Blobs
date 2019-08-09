@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use amethyst::core::{Hidden, Transform};
 use amethyst::ecs::{Entities, Join, LazyUpdate, Read, ReadStorage, System} ;
 
-use crate::config::FovConfig;
+use crate::config::BlobsConfig;
 use crate::utils::geometry;
 use crate::map::Map;
 use crate::components::{Explored, Init, Intent, Mob, Player, Tile};
@@ -23,7 +23,7 @@ impl<'s> System<'s> for FovSystem {
         ReadStorage<'s, Hidden>,
         Read<'s, LazyUpdate>,
         Read<'s, Map>,
-        Read<'s, FovConfig>,
+        Read<'s, BlobsConfig>,
         Entities<'s>
     );
 
@@ -64,7 +64,7 @@ impl<'s> System<'s> for FovSystem {
         if compute {
             let fov = generate_fov(player_x, player_y,
                                map.width(), map.height(),
-                               &map, &tiles, config.radius);
+                               &map, &tiles, config.fov.radius);
 
             for (_, _, transform, entity) in (
                 &tiles, !&explored, &transform, &entities).join() {

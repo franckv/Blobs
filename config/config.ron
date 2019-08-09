@@ -10,6 +10,12 @@
         max_rooms: 50,
         tile_size: 16
     ),
+    panel: (
+        bottom: 20,
+        right: 20,
+        bottom_lines: 13,
+        font_size: 20
+    ),
     fov: (
         radius: 10,
         distance: 2
