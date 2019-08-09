@@ -1,6 +1,7 @@
 use amethyst::core::{Hidden, Transform};
 use amethyst::ecs::{Entity, Entities, Join, ReadStorage, System, WriteStorage};
 
+use super::utils;
 use crate::components::{
     Action, Dead, Direction, Fighter,
     Health, Intent, Mob, Name, Player};
@@ -82,10 +83,7 @@ fn attack<'s>(attacker: &Entity, defender: &Entity,
 
             if let Some(health) = health.get_mut(*defender) {
                 health.damage(damage_d);
-                let name = match name.get(*defender) {
-                    Some(name) => name.name(),
-                    _ => "Defender"
-                };
+                let name = utils::get_name(*attacker, "Defender", &name);
                 println!("{} take {} damage ({}/{})",
                 name, damage_d, health.current(), health.max());
                 if health.current() == 0 {
@@ -95,10 +93,7 @@ fn attack<'s>(attacker: &Entity, defender: &Entity,
 
             if let Some(health) = health.get_mut(*attacker) {
                 health.damage(damage_a);
-                let name = match name.get(*attacker) {
-                    Some(name) => name.name(),
-                    _ => "Attacker"
-                };
+                let name = utils::get_name(*attacker, "Attacker", &name);
                 println!("{} take {} damage ({}/{})",
                 name, damage_a, health.current(), health.max());
                 if health.current() == 0 {

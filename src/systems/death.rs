@@ -1,5 +1,6 @@
 use amethyst::ecs::{Entities, Join, ReadStorage, System};
 
+use super::utils;
 use crate::components::{Dead, Name};
 
 #[derive(Default)]
@@ -14,10 +15,7 @@ impl<'s> System<'s> for DeathSystem {
 
     fn run(&mut self, (dead, name, entities): Self::SystemData) {
         for (_, entity) in (&dead, &entities).join() {
-            let name = match name.get(entity) {
-                Some(name) => name.name(),
-                _ => "Entity"
-            };
+            let name = utils::get_name(entity, "Entity", &name);
             println!("{} is dead !", name);
             entities.delete(entity).unwrap();
         }
