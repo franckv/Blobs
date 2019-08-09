@@ -1,24 +1,29 @@
 use amethyst::core::{Hidden, Transform};
-use amethyst::ecs::{Entities, Join, ReadStorage, System, WriteStorage};
+use amethyst::ecs::{Entity, Entities, Join, ReadStorage, System, WriteStorage};
 
-use crate::components::{Action, Direction, Intent, Mob, Player};
+use crate::components::{
+    Action, Dead, Direction, Fighter,
+    Health, Intent, Mob, Player};
 
 #[derive(Default)]
 pub struct AttackSystem;
 
 impl<'s> System<'s> for AttackSystem {
     type SystemData = (
-        ReadStorage<'s, Transform>,
+        WriteStorage<'s, Dead>,
+        ReadStorage<'s, Fighter>,
+        WriteStorage<'s, Health>,
         ReadStorage<'s, Hidden>,
         WriteStorage<'s, Intent>,
         ReadStorage<'s, Mob>,
         ReadStorage<'s, Player>,
+        ReadStorage<'s, Transform>,
         Entities<'s>
     );
 
-    fn run(&mut self, (transform, hidden, mut intents, mob, player, entities):
-           Self::SystemData) {
-
+    fn run(&mut self, (mut dead, fighter, mut health, hidden,
+                       mut intents, mob, player, transform,
+                       entities): Self::SystemData) {
         let mut remove_intent = None;
 
         for (player_trans, intent, player_entity) in (
@@ -42,14 +47,15 @@ impl<'s> System<'s> for AttackSystem {
                     }
                 };
 
-                for (mob_trans, _, _, _) in (
+                for (mob_trans, _, _, mob_entity) in (
                     &transform, !&hidden, &mob, &entities).join() {
                     let (mob_x, mob_y) = (
                         mob_trans.translation().x, mob_trans.translation().y);
 
                     if x + dx == mob_x && y + dy == mob_y {
-                        println!("Attack!");
                         remove_intent = Some(player_entity);
+                        attack(&player_entity, &mob_entity,
+                               &fighter, &mut health, &mut dead);
                         break;
                     }
                 }
@@ -60,4 +66,34 @@ impl<'s> System<'s> for AttackSystem {
             intents.remove(entity);
         }
     }
+}
+
+fn attack<'s>(attacker: &Entity, defender: &Entity,
+              fighter: &ReadStorage<'s, Fighter>,
+              health: &mut WriteStorage<'s, Health>,
+              dead: &mut WriteStorage<'s, Dead>) {
+    if let (Some(attack), Some(defense)) =
+        (fighter.get(*attacker), fighter.get(*defender)) {
+            println!("Attack!");
+            let damage_d = attack.attack() - defense.defense();
+            let damage_a = defense.attack() - attack.defense();
+
+            if let Some(health) = health.get_mut(*defender) {
+                health.damage(damage_d);
+                println!("Defender take {} damage ({}/{})",
+                damage_d, health.current(), health.max());
+                if health.current() == 0 {
+                    dead.insert(*defender, Dead).unwrap();
+                }
+            }
+
+            if let Some(health) = health.get_mut(*attacker) {
+                health.damage(damage_a);
+                println!("Attacker take {} damage ({}/{})",
+                damage_a, health.current(), health.max());
+                if health.current() == 0 {
+                    dead.insert(*attacker, Dead).unwrap();
+                }
+            }
+        }
 }

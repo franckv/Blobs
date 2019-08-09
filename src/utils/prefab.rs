@@ -2,19 +2,23 @@ use amethyst::core::Transform;
 use amethyst::core::math::Vector3;
 use amethyst::ecs::{Builder, Entity, EntityBuilder, World};
 
-use crate::components::{Mob, Player, Tile};
+use crate::components::{Fighter, Health, Mob, Player, Tile};
 use crate::map::{Map, TileType};
 use crate::utils::sprite::{Sprite, SpriteHandler};
 
 pub fn create_player(the_world: &mut World,
                      player_x: usize, player_y: usize) -> Entity {
     create_entity(the_world, player_x, player_y, 1, Some(Sprite::Player), 1.)
+        .with(Health::new(100))
+        .with(Fighter::new(5, 2))
         .with(Player)
         .build()
 }
 
 pub fn create_mob(the_world: &mut World, x: usize, y: usize) -> Entity {
     create_entity(the_world, x, y, 1, Some(Sprite::Blob), 16./24.)
+        .with(Health::new(10))
+        .with(Fighter::new(3, 1))
         .with(Mob)
         .build()
 }
