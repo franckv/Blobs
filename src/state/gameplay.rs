@@ -1,13 +1,16 @@
 use amethyst::{GameData, SimpleState, StateData, StateEvent, SimpleTrans, Trans};
+use amethyst::assets::Loader;
 use amethyst::core::Transform;
 use amethyst::ecs::{Builder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::Camera;
+use amethyst::ui::{Anchor, TtfFormat, UiText, UiTransform};
 
 use crate::config::MapConfig;
 use crate::components::Init;
 use crate::map::{Generator, Map};
 use crate::utils::prefab;
+use crate::ui;
 use crate::utils::sprite::{SpriteHandler, SpriteSheets};
 
 #[derive(Default)]
@@ -34,6 +37,7 @@ impl SimpleState for GameplayState {
 
         prefab::create_player(the_world, player_x, player_y);
         init_camera(the_world);
+        init_ui(the_world);
     }
 
     fn handle_event(&mut self, _data: StateData<'_, GameData<'_, '_>>,
@@ -96,4 +100,37 @@ fn init_camera(the_world: &mut World) {
         .with(camera)
         .with(transform)
         .build();
+}
+
+fn init_ui(the_world: &mut World) {
+    let font = the_world.read_resource::<Loader>().load(
+        "font.ttf",
+        TtfFormat,
+        (),
+        &the_world.read_resource()
+    );
+
+    let transform = UiTransform::new(
+        "hp".to_string(),
+        Anchor::TopLeft,
+        Anchor::Middle,
+        260., -20., 5.,
+        500., 50.);
+
+    let mut text = UiText::new(
+        font.clone(),
+        "HP:".to_string(),
+        [1., 1., 1., 1.],
+        20.);
+
+    text.align = Anchor::MiddleLeft;
+
+    let label = the_world.create_entity()
+        .with(transform)
+        .with(text)
+        .build();
+
+    let hp = ui::Hp::new(label);
+
+    the_world.add_resource(hp);
 }

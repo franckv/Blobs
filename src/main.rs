@@ -9,6 +9,7 @@ use amethyst::input::{InputBundle, StringBindings};
 use amethyst::renderer::plugins::{RenderFlat2D, RenderToWindow};
 use amethyst::renderer::types::DefaultBackend;
 use amethyst::renderer::RenderingBundle;
+use amethyst::ui::{RenderUi, UiBundle};
 use amethyst::utils::application_root_dir;
 
 use log::LevelFilter;
@@ -18,6 +19,7 @@ pub mod components;
 pub mod map;
 mod state;
 mod systems;
+mod ui;
 pub mod utils;
 
 use crate::state::GameplayState;
@@ -45,6 +47,7 @@ pub fn main() -> amethyst::Result<()> {
         .with_plugin(
             RenderToWindow::from_config_path(display_config_path)
             .with_clear([0., 0., 0., 1.]))
+        .with_plugin(RenderUi::default())
         .with_plugin(RenderFlat2D::default());
 
     let input_bundle = InputBundle::<StringBindings>::new()
@@ -59,6 +62,8 @@ pub fn main() -> amethyst::Result<()> {
         .with(systems::MoveSystem, "move_system", &["death_system", "input_mapper"])
         .with(systems::FovSystem, "fov_system", &["move_system"])
         .with(systems::InitSystem, "init_system", &["fov_system"])
+        .with(systems::UiSystem, "ui_system", &["attack_system"])
+        .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(rendering_bundle)?;
 
     if config.log.debug {

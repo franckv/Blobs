@@ -1,4 +1,4 @@
-use amethyst::core::Transform;
+use amethyst::core::{Hidden, Transform};
 use amethyst::core::math::Vector3;
 use amethyst::ecs::{Builder, Entity, EntityBuilder, World};
 
@@ -22,6 +22,7 @@ pub fn create_mob(the_world: &mut World, x: usize, y: usize) -> Entity {
         .with(Fighter::new(3, 1))
         .with(Name::new("Blob"))
         .with(Mob)
+        .with(Hidden)
         .build()
 }
 
