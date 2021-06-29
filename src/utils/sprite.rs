@@ -5,6 +5,7 @@ use amethyst::ecs::World;
 use amethyst::renderer::{
     ImageFormat, SpriteRender, SpriteSheet,
     SpriteSheetFormat, Texture};
+use amethyst::prelude::WorldExt;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SpriteSheets {

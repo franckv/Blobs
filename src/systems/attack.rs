@@ -28,7 +28,7 @@ impl<'s> System<'s> for AttackSystem {
     );
 
     fn run(&mut self, (mut dead, fighter, mut health, hidden,
-                       mut intents, mob, name, player, transform,
+                       mut intents, mob, name, _player, transform,
                        mut logs, entities): Self::SystemData) {
         let mut remove_intent = None;
 

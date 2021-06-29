@@ -5,6 +5,7 @@ use amethyst::ecs::{Builder, World};
 use amethyst::input::{VirtualKeyCode, is_key_down};
 use amethyst::renderer::Camera;
 use amethyst::ui::{Anchor, LineMode, TtfFormat, UiText, UiTransform};
+use amethyst::prelude::WorldExt;
 
 use crate::config::BlobsConfig;
 use crate::components::Init;
@@ -29,7 +30,7 @@ impl SimpleState for GameplayState {
         sprite_handler.add_sprite_sheet(the_world, SpriteSheets::Mobs,
                                              "mobs.png", "mobs.ron");
 
-        the_world.add_resource(sprite_handler);
+        the_world.insert(sprite_handler);
 
         the_world.create_entity().with(Init).build();
 
@@ -61,7 +62,7 @@ fn init_map(the_world: &mut World) -> (usize, usize) {
         (generator, map)
     };
 
-    the_world.add_resource(map);
+    the_world.insert(map);
 
     let rooms = generator.generate();
 
@@ -128,13 +129,13 @@ fn init_ui(the_world: &mut World) {
         260., -20., 5.,
         500., 50.);
 
-    let mut text = UiText::new(
+    let text = UiText::new(
         font.clone(),
         "HP:".to_string(),
         [1., 1., 1., 1.],
-        font_size);
-
-    text.align = Anchor::MiddleLeft;
+        font_size,
+        LineMode::Single,
+        Anchor::MiddleLeft);
 
     let label = the_world.create_entity()
         .with(transform)
@@ -143,7 +144,7 @@ fn init_ui(the_world: &mut World) {
 
     let hp = ui::Hp::new(label);
 
-    the_world.add_resource(hp);
+    the_world.insert(hp);
 
     let transform = UiTransform::new(
         "log".to_string(),
@@ -152,14 +153,13 @@ fn init_ui(the_world: &mut World) {
         410., log_height / 2., 5.,
         800., log_height);
 
-    let mut text = UiText::new(
+    let text = UiText::new(
         font.clone(),
         "".to_string(),
         [1., 1., 1., 1.],
-        font_size);
-
-    text.align = Anchor::TopLeft;
-    text.line_mode = LineMode::Wrap;
+        font_size,
+        LineMode::Wrap,
+        Anchor::TopLeft);
 
     let label = the_world.create_entity()
         .with(transform)
@@ -168,5 +168,5 @@ fn init_ui(the_world: &mut World) {
 
     let message_log = ui::MessageLog::new(label, log_lines);
 
-    the_world.add_resource(message_log);
+    the_world.insert(message_log);
 }

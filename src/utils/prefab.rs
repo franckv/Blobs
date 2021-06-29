@@ -1,6 +1,7 @@
 use amethyst::core::{Hidden, Transform};
 use amethyst::core::math::Vector3;
 use amethyst::ecs::{Builder, Entity, EntityBuilder, World};
+use amethyst::prelude::WorldExt;
 
 use crate::components::{Fighter, Health, Mob, Name, Player, Tile};
 use crate::map::{Map, TileType};

@@ -1,5 +1,5 @@
-use amethyst::core::shrev::{EventChannel, ReaderId};
-use amethyst::ecs::{Entities, Join, Read, ReadStorage, Resources, System, SystemData, WriteStorage};
+use amethyst::shrev::{EventChannel, ReaderId};
+use amethyst::ecs::{Entities, Join, Read, ReadStorage, System, SystemData, World, WriteStorage};
 use amethyst::input::{InputEvent, InputEvent::ActionPressed, StringBindings};
 
 use crate::components::{Direction, Action, Intent, Player};
@@ -22,7 +22,7 @@ impl<'s> System<'s> for InputSystem {
             let mut action = Action::None;
 
             for event in channel.read(self.reader.as_mut().unwrap()) {
-                debug!("Event: {:?}", event);
+                log::debug!("Event: {:?}", event);
                 if let ActionPressed(key) = event {
                     match key.as_ref() {
                         "up" => {
@@ -52,8 +52,8 @@ impl<'s> System<'s> for InputSystem {
         }
     }
 
-    fn setup(&mut self, res: &mut Resources) {
-        Self::SystemData::setup(res);
-        self.reader = Some(res.fetch_mut::<EventChannel<InputEvent<StringBindings>>>().register_reader());
+    fn setup(&mut self, world: &mut World) {
+        Self::SystemData::setup(world);
+        self.reader = Some(world.fetch_mut::<EventChannel<InputEvent<StringBindings>>>().register_reader());
     }
 }

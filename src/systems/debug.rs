@@ -25,39 +25,39 @@ impl<'s> System<'s> for DebugSystem {
     fn run(&mut self, (camera, explored, hidden, init, intent, mob, player,
                        sprite, tile, transform, entities): Self::SystemData) {
         for entity in entities.join() {
-            debug!("{:?}: [", entity);
+            log::debug!("{:?}: [", entity);
             if let Some(c) = camera.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = explored.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = hidden.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = init.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = intent.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = mob.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = player.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = sprite.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = tile.get(entity) {
-                debug!("  {:?}, ", c);
+                log::debug!("  {:?}, ", c);
             }
             if let Some(c) = transform.get(entity) {
-                debug!("  {:?}", c);
+                log::debug!("  {:?}", c);
             }
 
-            debug!("]");
+            log::debug!("]");
         }
     }
 }

@@ -35,7 +35,7 @@ pub fn draw_line<F>(x1: i32, y1:i32, x2: i32, y2: i32, mut f:F)
     }
 
 pub fn draw_circle_algo<F>(x: i32, y: i32, radius: i32,
-                  width: i32, height: i32, algo: Distance,
+                  _width: i32, _height: i32, algo: Distance,
                   mut f: F) where F: FnMut(i32, i32) -> bool {
 
     let mut dx = 0;
@@ -64,7 +64,7 @@ pub fn draw_circle_algo<F>(x: i32, y: i32, radius: i32,
 }
 
 pub fn draw_circle<F>(x: i32, y: i32, radius: i32,
-                  width: i32, height: i32,
+                  _width: i32, _height: i32,
                   mut f: F) where F: FnMut(i32, i32) -> bool {
 
     let mut dx = 0;

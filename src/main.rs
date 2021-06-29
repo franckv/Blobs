@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate log;
-
 use amethyst::{Application, LoggerConfig};
 use amethyst::GameDataBuilder;
 use amethyst::config::Config;
@@ -33,7 +30,7 @@ pub fn main() -> amethyst::Result<()> {
     let binding_path = config_dir.join("bindings.ron");
     let config_path = config_dir.join("config.ron");
 
-    let config = BlobsConfig::load(&config_path);
+    let config = BlobsConfig::load(&config_path).unwrap();
 
     let mut logger_config = LoggerConfig::default();
     logger_config.level_filter = if config.log.debug {
@@ -45,7 +42,7 @@ pub fn main() -> amethyst::Result<()> {
 
     let rendering_bundle = RenderingBundle::<DefaultBackend>::new()
         .with_plugin(
-            RenderToWindow::from_config_path(display_config_path)
+            RenderToWindow::from_config_path(display_config_path).unwrap()
             .with_clear([0., 0., 0., 1.]))
         .with_plugin(RenderUi::default())
         .with_plugin(RenderFlat2D::default());
