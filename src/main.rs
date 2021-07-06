@@ -1,78 +1,80 @@
-use amethyst::{Application, LoggerConfig};
-use amethyst::GameDataBuilder;
-use amethyst::config::Config;
-use amethyst::core::transform::TransformBundle;
-use amethyst::input::{InputBundle, StringBindings};
-use amethyst::renderer::plugins::{RenderFlat2D, RenderToWindow};
-use amethyst::renderer::types::DefaultBackend;
-use amethyst::renderer::RenderingBundle;
-use amethyst::ui::{RenderUi, UiBundle};
-use amethyst::utils::application_root_dir;
-
-use log::LevelFilter;
-
-mod config;
-pub mod components;
-pub mod map;
-mod state;
+mod components;
+mod map;
+mod prefab;
 mod systems;
-mod ui;
-pub mod utils;
 
-use crate::state::GameplayState;
-use crate::config::BlobsConfig;
+use simplelog::{Config, LevelFilter, TermLogger};
 
-pub fn main() -> amethyst::Result<()> {
-    let app_root = application_root_dir()?;
-    let assets_dir = app_root.join("assets");
-    let config_dir = app_root.join("config");
-    let display_config_path = config_dir.join("display.ron");
-    let binding_path = config_dir.join("bindings.ron");
-    let config_path = config_dir.join("config.ron");
+use bevy::{app::Events, prelude::*, text::Text2dSize, window::WindowResized};
+use map::{Generator, TileMap};
 
-    let config = BlobsConfig::load(&config_path).unwrap();
+const TILESIZE: u32 = 16;
+const WIDTH: u32 = 800;
+const HEIGHT: u32 = 600;
 
-    let mut logger_config = LoggerConfig::default();
-    logger_config.level_filter = if config.log.debug {
-        LevelFilter::Debug
-    } else {
-        LevelFilter::Info
-    };
-    amethyst::start_logger(logger_config);
+fn main() {
+    TermLogger::init(LevelFilter::Debug, Config::default()).expect("error");
 
-    let rendering_bundle = RenderingBundle::<DefaultBackend>::new()
-        .with_plugin(
-            RenderToWindow::from_config_path(display_config_path).unwrap()
-            .with_clear([0., 0., 0., 1.]))
-        .with_plugin(RenderUi::default())
-        .with_plugin(RenderFlat2D::default());
+    App::build()
+        .insert_resource(WindowDescriptor {
+            title: "Blob".to_owned(),
+            width: WIDTH as f32,
+            height: HEIGHT as f32,
+            ..Default::default()
+        })
+        .add_plugins(DefaultPlugins)
+        .add_startup_system(setup.system())
+        .add_system(bevy::input::system::exit_on_esc_system.system())
+        .add_system(systems::read_input.system())
+        .add_system(systems::move_sprite.system())
+        .add_system(window_resize.system())
+        .run();
+}
 
-    let input_bundle = InputBundle::<StringBindings>::new()
-        .with_bindings_from_file(binding_path)?;
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas: ResMut<Assets<TextureAtlas>>
+) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
-    let mut game_data = GameDataBuilder::default()
-        .with_bundle(TransformBundle::new())?
-        .with_bundle(input_bundle)?
-        .with(systems::InputSystem::default(), "input_mapper", &["input_system"])
-        .with(systems::AttackSystem, "attack_system", &["input_mapper"])
-        .with(systems::DeathSystem, "death_system", &["attack_system"])
-        .with(systems::MoveSystem, "move_system", &["death_system", "input_mapper"])
-        .with(systems::FovSystem, "fov_system", &["move_system"])
-        .with(systems::InitSystem, "init_system", &["fov_system"])
-        .with(systems::UiSystem, "ui_system", &["attack_system"])
-        .with_bundle(UiBundle::<StringBindings>::new())?
-        .with_bundle(rendering_bundle)?;
+    let texture = asset_server.load("dungeon.png");
+    let atlas =
+        TextureAtlas::from_grid(texture, Vec2::new(TILESIZE as f32, TILESIZE as f32), 16, 16);
+    let handle = texture_atlas.add(atlas);
 
-    if config.log.debug {
-        game_data = game_data.with(
-            systems::DebugSystem, "debug_system", &["init_system", "fov_system"]);
+    let world_width = WIDTH / TILESIZE;
+    let world_height = HEIGHT / TILESIZE;
+
+    let mut tilemap = TileMap::new(world_width, world_height);
+
+    let mut generator = Generator::new(world_width, world_height, 5, 10, 50);
+
+    let rooms = generator.generate();
+
+    for y in 0..generator.height() {
+        for x in 0..generator.width() {
+            log::debug!("New tile: ({},{})", x, y);
+            prefab::create_tile(
+                &mut commands,
+                x as u32,
+                y as u32,
+                generator.tile(x, y),
+                handle.clone()
+            );
+            tilemap.add_tile(generator.tile(x, y));
+        }
     }
 
-    let mut game = Application::build(assets_dir, GameplayState::default())?
-        .with_resource(config)
-        .build(game_data)?;
+    commands.insert_resource(tilemap);
 
-    game.run();
+    let (x, y) = rooms[0].center();
 
-    Ok(())
+    prefab::create_player(&mut commands, x, y, handle.clone());
+}
+
+fn window_resize(resize_event: Res<Events<WindowResized>>) {
+    for event in resize_event.get_reader().iter(&resize_event) {
+        log::debug!("Resize {}/{}", event.width, event.height);
+    }
 }

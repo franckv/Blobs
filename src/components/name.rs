@@ -1,12 +1,6 @@
-use amethyst::ecs::{Component, DenseVecStorage};
-
 #[derive(Clone, Debug)]
 pub struct Name {
     name: String
-}
-
-impl Component for Name {
-    type Storage = DenseVecStorage<Self>;
 }
 
 impl Name {

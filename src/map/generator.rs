@@ -1,62 +1,54 @@
 use crate::map::Rect;
-use crate::config::MapConfig;
+use crate::map::Tile;
 
 use rand::{Rng, thread_rng};
 
-#[derive(Copy, Clone, PartialEq)]
-pub enum TileType {
-    None,
-    Floor,
-    Wall,
-    Full
-}
-
 pub struct Generator {
-    width: usize,
-    height: usize,
-    min_size: usize,
-    max_size: usize,
-    max_rooms: usize,
-    tiles: Vec<TileType>
+    width: u32,
+    height: u32,
+    min_size: u32,
+    max_size: u32,
+    max_rooms: u32,
+    tiles: Vec<Tile>
 }
 
 impl Generator {
-    pub fn new(config: &MapConfig) -> Self {
+    pub fn new(width: u32, height: u32, min_size: u32, max_size: u32, max_rooms: u32) -> Self {
         let mut tiles = Vec::new();
 
-        for _ in 0..config.height {
-            for _ in 0..config.width {
-                tiles.push(TileType::Full);
+        for _ in 0..height {
+            for _ in 0..width {
+                tiles.push(Tile::Full);
             }
         }
 
         Generator {
-            width: config.width,
-            height: config.height,
-            min_size: config.min_size,
-            max_size: config.max_size,
-            max_rooms: config.max_rooms,
+            width,
+            height,
+            min_size,
+            max_size,
+            max_rooms,
             tiles
         }
     }
 
-    pub fn width(&self) -> usize {
+    pub fn width(&self) -> u32 {
         self.width
     }
 
-    pub fn height(&self) -> usize {
+    pub fn height(&self) -> u32 {
         self.height
     }
 
-    pub fn min_size(&self) -> usize {
+    pub fn min_size(&self) -> u32 {
         self.min_size
     }
 
-    pub fn max_size(&self) -> usize {
+    pub fn max_size(&self) -> u32 {
         self.max_size
     }
 
-    pub fn max_rooms(&self) -> usize {
+    pub fn max_rooms(&self) -> u32 {
         self.max_rooms
     }
 
@@ -69,25 +61,27 @@ impl Generator {
                 let current = self.tile(x, y);
                 let tile_type =
                     if border && (x == left || x == right || y == bottom || y == top) {
-                        if current == TileType::Full {
-                            TileType::Wall
+                        if current == Tile::Full {
+                            Tile::Wall
                         } else {
                             current
                         }
                     } else {
-                        TileType::Floor
+                        Tile::Floor
                     };
-                self.tiles[x  + y * self.width] = tile_type;
+                let idx = x + y * self.width;
+                self.tiles[idx as usize] = tile_type;
             }
         }
     }
 
-    pub fn tiles(&self) -> &Vec<TileType> {
+    pub fn tiles(&self) -> &Vec<Tile> {
         &self.tiles
     }
 
-    pub fn tile(&self, x: usize, y: usize) -> TileType {
-        self.tiles[x + y * self.width]
+    pub fn tile(&self, x: u32, y: u32) -> Tile {
+        let idx = x + y * self.width;
+        self.tiles[idx as usize]
     }
 
     pub fn generate(&mut self) -> Vec<Rect> {

@@ -1,5 +1,3 @@
-use amethyst::ecs::{Component, DenseVecStorage};
-
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {
     Left,
@@ -30,9 +28,3 @@ impl Intent {
         }
     }
 }
-
-impl Component for Intent {
-    type Storage = DenseVecStorage<Self>;
-}
-
-

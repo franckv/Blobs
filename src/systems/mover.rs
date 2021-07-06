@@ -1,64 +1,26 @@
-use amethyst::core::Transform;
-use amethyst::ecs::{Entities, Join, LazyUpdate, Read, ReadStorage, System, WriteStorage};
+use crate::components::{Action, Direction, Intent};
+use bevy::prelude::*;
 
-use crate::map::Map;
-use crate::components::{Direction, Action, Intent, Tile};
+pub fn move_sprite(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Transform, &Intent)>
+) {
+    for (entity, mut transform, intent) in query.iter_mut() {
+        let step_x = 16.;
+        let step_y = 16.;
 
-#[derive(Default)]
-pub struct MoveSystem;
+        if let Action::Move(dir) = intent.action() {
+            let (dx, dy) = match dir {
+                Direction::Up => (0., step_y),
+                Direction::Down => (0., -step_y),
+                Direction::Left => (-step_x, 0.),
+                Direction::Right => (step_x, 0.)
+            };
 
-impl<'s> System<'s> for MoveSystem {
-    type SystemData = (
-        WriteStorage<'s, Transform>,
-        ReadStorage<'s, Intent>,
-        ReadStorage<'s, Tile>,
-        Read<'s, LazyUpdate>,
-        Read<'s, Map>,
-        Entities<'s>
-    );
-
-    fn run(&mut self, (mut transform, intents, tiles, update, map, entities):
-           Self::SystemData) {
-        for (transform, intent, entity) in
-            (&mut transform, &intents, &entities).join() {
-            let (x, y, z) = (
-                transform.translation().x,
-                transform.translation().y,
-                transform.translation().z);
-
-            if let Action::Move(dir) = intent.action() {
-                let (dx, dy) = match dir {
-                    Direction::Up => {
-                        (0., 1.)
-                    },
-                    Direction::Down => {
-                        (0., -1.)
-                    },
-                    Direction::Left => {
-                        (-1., 0.)
-                    },
-                    Direction::Right => {
-                        (1., 0.)
-                    },
-                };
-
-                if map.in_bound(x + dx, y + dy) &&
-                    !Self::is_blocked(x + dx, y + dy, &map, &tiles) {
-                    transform.set_translation_xyz(x + dx, y + dy, z);
-                }
-
-            }
-
-            update.remove::<Intent>(entity);
+            transform.translation.x += dx;
+            transform.translation.y += dy;
         }
-    }
-}
 
-impl<'s> MoveSystem {
-    fn is_blocked(x: f32, y: f32, map: &Map, tiles: &ReadStorage<'s, Tile>) -> bool {
-        let entity = map.tile(x as usize, y as usize);
-        let tile = tiles.get(entity).unwrap();
-
-        tile.is_block()
+        commands.entity(entity).remove::<Intent>();
     }
 }
